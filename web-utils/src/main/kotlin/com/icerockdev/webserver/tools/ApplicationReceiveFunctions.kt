@@ -1,0 +1,20 @@
+/*
+ * Copyright 2020 IceRock MAG Inc. Use of this source code is governed by the Apache 2.0 license.
+ */
+
+package com.icerockdev.webserver.tools
+
+import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
+import com.icerockdev.exception.BadRequestException
+import io.ktor.application.ApplicationCall
+import io.ktor.request.receive
+
+suspend inline fun <reified T : Any> ApplicationCall.receiveRequest(): T {
+    return try {
+        receive()
+    } catch (e: MissingKotlinParameterException) {
+        throw BadRequestException(e)
+    } catch (e: Throwable) {
+        throw BadRequestException(message = "Invalid request body")
+    }
+}
