@@ -4,7 +4,10 @@
 
 package com.icerockdev.validation
 
+import org.apache.commons.beanutils.BeanUtils
 import javax.validation.Constraint
+import javax.validation.ConstraintValidator
+import javax.validation.ConstraintValidatorContext
 import javax.validation.Payload
 import kotlin.reflect.KClass
 
@@ -16,9 +19,10 @@ import kotlin.reflect.KClass
  * @FieldMatch(first = "password", second = "confirmPassword", message = "The password fields must match")
  *
  * Example, compare more than 1 pair of fields:
- * @FieldMatch.List({
- * @FieldMatch(first = "password", second = "confirmPassword", message = "The password fields must match"),
- * @FieldMatch(first = "email", second = "confirmEmail", message = "The email fields must match")})
+ * @FieldMatch.List([
+ *      @FieldMatch(first = "password", second = "confirmPassword", message = "The password fields must match"),
+ *      @FieldMatch(first = "email", second = "confirmEmail", message = "The email fields must match")})
+ * ])
  */
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FILE, AnnotationTarget.ANNOTATION_CLASS)
 @kotlin.annotation.Retention(AnnotationRetention.RUNTIME)
@@ -46,4 +50,27 @@ annotation class FieldMatch(
     @kotlin.annotation.Retention(AnnotationRetention.RUNTIME)
     @MustBeDocumented
     annotation class List(val value: Array<FieldMatch>)
+}
+
+class FieldMatchValidator : ConstraintValidator<FieldMatch, Any> {
+    private var firstFieldName: String? = null
+    private var secondFieldName: String? = null
+
+    override fun initialize(constraintAnnotation: FieldMatch) {
+        firstFieldName = constraintAnnotation.first
+        secondFieldName = constraintAnnotation.second
+    }
+
+    override fun isValid(value: Any, constraintContext: ConstraintValidatorContext?): Boolean {
+        try {
+            val firstObj = BeanUtils.getProperty(value, firstFieldName)
+            val secondObj = BeanUtils.getProperty(value, secondFieldName)
+
+            return firstObj == null && secondObj == null || firstObj != null && firstObj == secondObj
+        } catch (ignore: Exception) {
+            // ignore
+        }
+
+        return true
+    }
 }
