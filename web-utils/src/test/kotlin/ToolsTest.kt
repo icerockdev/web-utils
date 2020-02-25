@@ -3,13 +3,15 @@
  */
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.icerockdev.i18n.I18N
-import com.icerockdev.validation.InIntArray
 import com.icerockdev.api.ErrorResponse
 import com.icerockdev.api.Request
+import com.icerockdev.exception.ErrorDetail
 import com.icerockdev.exception.UserException
+import com.icerockdev.i18n.I18N
+import com.icerockdev.validation.DateFormat
+import com.icerockdev.validation.InIntArray
+import org.junit.Assert.assertArrayEquals
 import org.junit.Test
-import org.skyscreamer.jsonassert.JSONAssert
 import java.util.*
 import javax.validation.constraints.*
 import kotlin.test.assertEquals
@@ -32,7 +34,10 @@ class ToolsTest {
         @field:InIntArray(value = [10, 20], message = "Should it be 10 or 20")
         var age: Int = 10,
         @field:Email(message = "Invalid email")
-        var email: String = "test@test.er"
+        var email: String = "test@test.er",
+        @field:DateFormat(message = "Date must be in YYYY-MM-DD format", pattern = "YYYY-MM-DD")
+        @field:NotNull(message = "Date is required")
+        var date: String = "2020-02-25"
     ) : Request()
 
     @Test
@@ -54,10 +59,11 @@ class ToolsTest {
         testObj.name = null
         testObj.age = 21
         testObj.email = "efwfwefewfwe"
+        testObj.date = "Invalid date"
 
         val errors = testObj.validate()
 
-        assertEquals(4, errors.size)
+        assertEquals(5, errors.size)
         assertFalse(testObj.isValid())
     }
 
@@ -69,19 +75,28 @@ class ToolsTest {
         testObj.name = null
         testObj.age = 21
         testObj.email = "efwfwefewfwe"
+        testObj.date = "Invalid date"
 
         val errorsResponse = ErrorResponse(testObj.validate())
-
         errorsResponse.timestamp = 1566554901677
 
-        val result = mapper.writeValueAsString(errorsResponse)
+        val expectedErrors = arrayOf(
+            ErrorDetail(message="Should it be 10 or 20", code=0),
+            ErrorDetail(message="Date must be in YYYY-MM-DD format", code=0),
+            ErrorDetail(message="Name is required", code=0),
+            ErrorDetail(message="Invalid email", code=0),
+            ErrorDetail(message="должно быть меньше или равно 14", code=0)
+        ).sortedArrayWith(compareBy {it.message})
 
-        assertEquals(4, errorsResponse.dataList.size)
-        JSONAssert.assertEquals(
-            "{\"status\":422,\"message\":\"Validation Error\",\"timestamp\":1566554901677,\"success\":false,\"data\":[{\"message\":\"Invalid email\",\"code\":0},{\"message\":\"Name is required\",\"code\":0},{\"message\":\"Should it be 10 or 20\",\"code\":0},{\"message\":\"должно быть меньше или равно 14\",\"code\":0}]}",
-            result,
-            false
-        )
+        val actualErrors = errorsResponse.dataList.map {
+                error -> error as ErrorDetail
+        }.toTypedArray().sortedArrayWith(compareBy {it.message})
+
+        assertEquals(5, errorsResponse.dataList.size)
+        assertEquals(422, errorsResponse.status)
+        assertEquals("Validation Error", errorsResponse.message)
+        assertEquals(false, errorsResponse.isSuccess)
+        assertArrayEquals(expectedErrors, actualErrors)
     }
 
     @Test
@@ -92,14 +107,20 @@ class ToolsTest {
         val errorsResponse = ErrorResponse(testObj.validate())
 
         errorsResponse.timestamp = 1566554901677
-        val result = mapper.writeValueAsString(errorsResponse)
+
+        val expectedErrors = arrayOf(
+            ErrorDetail(message="Should it be 10 or 20", code=0)
+        ).sortedArrayWith(compareBy {it.message})
+
+        val actualErrors = errorsResponse.dataList.map {
+                error -> error as ErrorDetail
+        }.toTypedArray().sortedArrayWith(compareBy {it.message})
 
         assertEquals(1, errorsResponse.dataList.size)
-        JSONAssert.assertEquals(
-            "{\"status\":422,\"message\":\"Validation Error\",\"timestamp\":1566554901677,\"success\":false,\"data\":[{\"message\":\"Should it be 10 or 20\",\"code\":0}]}",
-            result,
-            false
-        )
+        assertEquals(422, errorsResponse.status)
+        assertEquals("Validation Error", errorsResponse.message)
+        assertEquals(false, errorsResponse.isSuccess)
+        assertArrayEquals(expectedErrors, actualErrors)
     }
 
     @Test
@@ -111,11 +132,9 @@ class ToolsTest {
         result.timestamp = 1566554901677
 
         assertEquals(0, result.dataList.size)
-        JSONAssert.assertEquals(
-            "{\"status\":403,\"message\":\"UserException\",\"timestamp\":1566554901677,\"success\":false,\"data\":[]}",
-            mapper.writeValueAsString(result),
-            false
-        )
+        assertEquals(403, result.status)
+        assertEquals("UserException", result.message)
+        assertEquals(false, result.isSuccess)
     }
 
     @Test
@@ -135,5 +154,4 @@ class ToolsTest {
         assertEquals("USD", i18nDefault.t("CurrencyCode"))
         assertEquals("USA", i18nDefault.t("CountryName"))
     }
-
 }

@@ -9,7 +9,7 @@ import com.icerockdev.webserver.tools.DateTimeUtil
 
 open class ResponseList(
     @JsonProperty("data")
-    var dataList: List<Any> = listOf(),
+    open var dataList: List<Any> = listOf(),
     status: Int = 200,
     message: String = "",
     timestamp: Long = DateTimeUtil.getTimestamp(),
