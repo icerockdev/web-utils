@@ -9,7 +9,7 @@ import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 class BadRequestException(message: String = "Bad Request") : ExtUserException(400, message) {
     constructor(exception: MissingKotlinParameterException) : this() {
         val errorList = mutableListOf<ErrorDetail>()
-        val fieldName = exception.path.joinToString(separator = ".") { it.fieldName }
+        val fieldName = exception.path.joinToString(separator = ".") { it.fieldName ?: "[]" }
         errorList.add(ErrorDetail(message = "Property $fieldName are required"))
         setErrors(errorList)
     }
