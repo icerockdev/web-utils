@@ -29,7 +29,7 @@ application {
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${properties["kotlin_version"]}")
 
-    implementation("com.icerockdev:web-utils:0.0.1")
+    implementation("com.icerockdev:web-utils:0.0.2")
 }
 
 java {

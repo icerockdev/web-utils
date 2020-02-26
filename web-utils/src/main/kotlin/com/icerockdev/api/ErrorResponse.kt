@@ -4,14 +4,10 @@
 
 package com.icerockdev.api
 
+import com.icerockdev.exception.ErrorDetail
 import javax.validation.ConstraintViolation
 
 class ErrorResponse() : ResponseList() {
-    data class ErrorDetail(
-        val message: String,
-        val code: Int = 0
-    )
-
     constructor(constraintViolationList: Set<ConstraintViolation<Request>>) : this() {
         val list = mutableListOf<ErrorDetail>()
         for (constraintViolation in constraintViolationList) {

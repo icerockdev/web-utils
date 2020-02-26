@@ -4,14 +4,18 @@
 
 package com.icerockdev.validation
 
-
 import javax.validation.Constraint
 import javax.validation.ConstraintValidator
 import javax.validation.ConstraintValidatorContext
 import javax.validation.ReportAsSingleViolation
 import kotlin.reflect.KClass
 
-
+/**
+ * Validation annotation to validate field than contains in array.
+ *
+ * Example, validate field value contains in enum:
+ * @field:InIntListByEnum(IAvailableIntByEnum = Status::class, message = "Should it be 30 or 40")
+ */
 interface IAvailableIntByEnum {
     fun getAvailableIntList(listName: String): List<Int>
 }

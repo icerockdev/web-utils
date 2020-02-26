@@ -4,13 +4,18 @@
 
 package com.icerockdev.validation
 
-
 import javax.validation.Constraint
 import javax.validation.ConstraintValidator
 import javax.validation.ConstraintValidatorContext
 import javax.validation.ReportAsSingleViolation
 import kotlin.reflect.KClass
 
+/**
+ * Validation annotation to validate field than contains in array.
+ *
+ * Example, validate field value contains in array:
+ * @field:InIntArray(value = [10, 20], message = "Should it be 10 or 20")
+ */
 @Target(AnnotationTarget.FIELD)
 @MustBeDocumented
 @Constraint(validatedBy = [InIntArrayValidator::class])
