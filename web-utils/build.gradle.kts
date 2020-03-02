@@ -13,7 +13,7 @@ apply(plugin = "java")
 apply(plugin = "kotlin")
 
 group = "com.icerockdev"
-version = "0.0.3"
+version = "0.0.4"
 
 val sourcesJar by tasks.registering(Jar::class) {
     classifier = "sources"
@@ -42,6 +42,9 @@ dependencies {
     api("javax.el:javax.el-api:${properties["javax_el_api_version"]}")
     api("org.glassfish.web:javax.el:${properties["javax_el_version"]}")
     api("commons-beanutils:commons-beanutils:${properties["beanutils_version"]}")
+
+    // BCrypt
+    implementation(group = "org.springframework.security", name = "spring-security-core", version = properties["spring_core_version"].toString())
 
     // i18n
     implementation("org.gnu.gettext:libintl:${properties["gnu_gettext_version"]}")
