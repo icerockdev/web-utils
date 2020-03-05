@@ -28,8 +28,10 @@ application {
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${properties["kotlin_version"]}")
+    implementation("biz.paluch.logging:logstash-gelf:1.13.0")
 
-    implementation("com.icerockdev:web-utils:0.0.3")
+    implementation(project(":web-utils"))
+//    implementation("com.icerockdev:web-utils:0.0.4")
 }
 
 java {

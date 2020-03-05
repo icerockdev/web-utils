@@ -21,18 +21,32 @@
             <level>ERROR</level>
         </filter>
     </appender>
+    <appender name="gelf" class="biz.paluch.logging.gelf.logback.GelfLogbackAppender">
+        <host>${graylog}</host>
+        <port>12201</port>
+        <version>1.1</version>
+        <facility>test</facility>
+        <extractStackTrace>true</extractStackTrace>
+        <filterStackTrace>true</filterStackTrace>
+        <mdcProfiling>true</mdcProfiling>
+        <includeFullMdc>true</includeFullMdc>
+        <timestampPattern>yyyy-MM-dd HH:mm:ss,SSS</timestampPattern>
+        <maximumMessageSize>8192</maximumMessageSize>
+    </appender>
 
     <root level="WARN">
-        <appender-ref ref="STDOUT"/>
         <appender-ref ref="STDERR"/>
+        <appender-ref ref="gelf"/>
     </root>
 
     <logger name="com.icerockdev" level="TRACE" additivity="false">
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="STDERR"/>
+        <appender-ref ref="gelf"/>
     </logger>
     <logger name="Application" level="TRACE" additivity="false">
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="STDERR"/>
+        <appender-ref ref="gelf"/>
     </logger>
 </configuration>

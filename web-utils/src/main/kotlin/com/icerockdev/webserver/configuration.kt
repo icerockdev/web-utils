@@ -4,24 +4,26 @@
 
 package com.icerockdev.webserver
 
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.util.StdDateFormat
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import com.icerockdev.webserver.log.Log.throwableLog
 import com.icerockdev.api.ErrorResponse
 import com.icerockdev.api.Response
 import com.icerockdev.exception.UserException
+import io.ktor.application.Application
 import io.ktor.application.ApplicationCall
 import io.ktor.application.call
 import io.ktor.features.*
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
-import io.ktor.jackson.jackson
 import io.ktor.request.httpMethod
 import io.ktor.request.path
 import io.ktor.response.respond
 import io.ktor.util.pipeline.PipelineContext
+import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
 import java.util.*
 
@@ -83,7 +85,7 @@ fun CORS.Configuration.applyDefaultCORS(): CORS.Configuration {
 
 fun CallLogging.Configuration.applyDefaultLogging(): CallLogging.Configuration {
     level = Level.TRACE
-    callIdMdc("traceUUID")
+    callIdMdc(Constants.LOG_FIELD_TRACE_UUID)
     mdc(Constants.LOG_FIELD_HEADERS) { call: ApplicationCall ->
         entriesToString(call.request.headers.entries())
     }
@@ -109,18 +111,18 @@ private fun entriesToString(entries: Set<Map.Entry<String, List<String>>>): Stri
 }
 
 
-fun defaultContentNegotiation(): ContentNegotiation.Configuration.() -> Unit {
+fun getObjectMapper(): ObjectMapper.() -> Unit {
     return {
-        jackson {
-            configure(SerializationFeature.INDENT_OUTPUT, true)
-            disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-            dateFormat = StdDateFormat()
-            registerKotlinModule()
-        }
+        configure(SerializationFeature.INDENT_OUTPUT, true)
+        disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+        disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+        dateFormat = StdDateFormat()
+        registerKotlinModule()
     }
 }
 
 fun getMonitoringPipeline(): suspend PipelineContext<Unit, ApplicationCall>.(Unit) -> Unit {
+    val logger = LoggerFactory.getLogger(Application::class.java)
     return {
         try {
             proceed()
@@ -140,7 +142,7 @@ fun getMonitoringPipeline(): suspend PipelineContext<Unit, ApplicationCall>.(Uni
                 ) {}
             )
             proceed()
-            throwableLog(e)
+            logger.error(e.localizedMessage, e)
         }
     }
 }

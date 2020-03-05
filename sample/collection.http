@@ -1,0 +1,27 @@
+POST http://127.0.0.1:8080/object
+Content-Type: application/json
+
+{
+  "email": "test@test.com",
+  "password": "123456"
+}
+
+###
+
+### Request with pagination and offer type
+GET http://127.0.0.1:8080/exception
+accept: application/json
+
+###
+
+### Request with pagination and offer type
+GET http://127.0.0.1:8080/handled
+accept: application/json
+
+###
+
+### Request with pagination and offer type
+GET http://127.0.0.1:8080/handled2
+accept: application/json
+
+###

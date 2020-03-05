@@ -8,7 +8,7 @@ repositories {
 }
 
 // Append dependency
-implementation("com.icerockdev:web-utils:0.0.3")
+implementation("com.icerockdev:web-utils:0.0.4")
 ````
 
 ## Library usage
@@ -18,6 +18,7 @@ Lib include tools for:
  - Exception list for common cases (BadRequestException, ForbiddenException, etc) 
  - Localization support tools
  - Validation support tools
+ 
 
 ## TODO
  - Support multiple connectors from HOCON file
