@@ -37,5 +37,6 @@ abstract class Request(
         return validate().isEmpty()
     }
 
+    @JsonIgnore
     fun getMembers() = this::class.memberProperties
 }
