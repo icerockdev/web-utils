@@ -8,14 +8,18 @@ import com.icerockdev.api.AbstractResponse
 import com.icerockdev.api.Request
 import com.icerockdev.exception.ForbiddenException
 import com.icerockdev.exception.ServerErrorException
-import com.icerockdev.webserver.log.JsonDataLogger
+import com.icerockdev.util.QueryParser
+import com.icerockdev.util.receiveQuery
 import com.icerockdev.webserver.*
+import com.icerockdev.webserver.log.JsonDataLogger
 import com.icerockdev.webserver.log.JsonSecret
 import com.icerockdev.webserver.tools.receiveRequest
-import io.ktor.application.*
+import io.ktor.application.Application
+import io.ktor.application.ApplicationCallPipeline
+import io.ktor.application.call
+import io.ktor.application.install
 import io.ktor.features.*
 import io.ktor.jackson.jackson
-import io.ktor.request.queryString
 import io.ktor.response.respond
 import io.ktor.routing.get
 import io.ktor.routing.post
@@ -40,6 +44,9 @@ fun Application.main() {
     install(ContentNegotiation) {
         jackson(block = getObjectMapper())
     }
+    install(QueryParser) {
+        mapperConfiguration = getObjectMapper()
+    }
 
     /**
      * @see <a href="https://ktor.io/advanced/pipeline.html#ktor-pipelines">Ktor Documentation</a>
@@ -48,7 +55,6 @@ fun Application.main() {
 
     routing {
         get("/") {
-            println(call.request.queryString())
             call.respond("!!!")
         }
 
@@ -72,10 +78,15 @@ fun Application.main() {
         get("/handled2") {
             throw ForbiddenException("Some handled exception")
         }
+
+        get("/get") {
+            val params = call.receiveQuery<QueryValues>()
+            call.respond(object : AbstractResponse(200, params.toString()) {})
+        }
     }
 }
 
-class TestRequest(val email: String, @JsonSecret val password: String): Request()
+class TestRequest(val email: String, @JsonSecret val password: String) : Request()
 class TestResponse2(status: Int, val email: String, @JsonSecret val password: String) :
     AbstractResponse(status, isSuccess = true) {
 }
@@ -85,3 +96,11 @@ class TestResponse(status: Int, message: String) :
     @JsonSecret
     val data = message
 }
+
+data class QueryValues(
+    private val email: String = "",
+    private val age: Int?,
+    private val testValue: Int,
+    private val test: List<String>?,
+    private val tmp: List<Int> = emptyList()
+)

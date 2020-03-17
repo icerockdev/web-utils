@@ -7,21 +7,22 @@ Content-Type: application/json
 }
 
 ###
-
-### Request with pagination and offer type
 GET http://127.0.0.1:8080/exception
 accept: application/json
 
 ###
 
-### Request with pagination and offer type
 GET http://127.0.0.1:8080/handled
 accept: application/json
 
 ###
 
-### Request with pagination and offer type
 GET http://127.0.0.1:8080/handled2
+accept: application/json
+
+###
+
+GET http://127.0.0.1:8080/get?age=10&TestValue=20&email=a@a.com&test=10&test=20&test&tmp=1&tmp=2&tmp=3
 accept: application/json
 
 ###
