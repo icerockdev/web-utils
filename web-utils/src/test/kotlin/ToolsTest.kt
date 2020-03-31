@@ -162,22 +162,4 @@ class ToolsTest {
         assertEquals("UserException", result.message)
         assertEquals(false, result.isSuccess)
     }
-
-    @Test
-    fun i18nTest() {
-        val i18n = I18N(
-            locale = Locale("fr", "FR"),
-            defaultCategory = "compile.messages"
-        )
-        val i18nDefault = I18N(
-            locale = Locale("en", "US"),
-            defaultCategory = "compile.messages"
-        )
-
-        assertEquals("Euro", i18n.t("CurrencyCode"))
-        assertEquals("France", i18n.t("CountryName"))
-
-        assertEquals("USD", i18nDefault.t("CurrencyCode"))
-        assertEquals("USA", i18nDefault.t("CountryName"))
-    }
 }

@@ -13,5 +13,6 @@ open class ResponseList(
     status: Int = 200,
     message: String = "",
     timestamp: Long = DateTimeUtil.getTimestamp(),
-    isSuccess: Boolean = true
+    isSuccess: Boolean = true,
+    totalCount: Int = 0
 ) : AbstractResponse(status, message, timestamp, isSuccess)
