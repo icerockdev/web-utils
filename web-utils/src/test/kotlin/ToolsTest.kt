@@ -122,6 +122,7 @@ class ToolsTest {
         assertEquals(422, errorsResponse.status)
         assertEquals("Validation Error", errorsResponse.message)
         assertEquals(false, errorsResponse.isSuccess)
+        assertEquals(errorsResponse.dataList.count(), errorsResponse.totalCount)
         assertArrayEquals(expectedErrors, actualErrors)
     }
 

@@ -14,6 +14,7 @@ class ErrorResponse() : ResponseList() {
             list.add(ErrorDetail(message = constraintViolation.message))
         }
         setValidationParams(list)
+        totalCount = list.count()
     }
 
     private fun setValidationParams(list: List<ErrorDetail>) {
@@ -25,6 +26,7 @@ class ErrorResponse() : ResponseList() {
 
     constructor(errorList: List<ErrorDetail>) : this() {
         setValidationParams(errorList)
+        totalCount = errorList.count()
     }
 
 }
