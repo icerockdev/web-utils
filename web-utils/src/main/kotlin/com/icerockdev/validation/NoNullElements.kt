@@ -1,3 +1,6 @@
+/*
+ * Copyright 2020 IceRock MAG Inc. Use of this source code is governed by the Apache 2.0 license.
+ */
 package com.icerockdev.validation
 
 import javax.validation.Constraint
@@ -11,7 +14,6 @@ import kotlin.annotation.AnnotationTarget.VALUE_PARAMETER
 import kotlin.reflect.KClass
 import javax.validation.ConstraintValidator
 import javax.validation.ConstraintValidatorContext
-
 
 /**
  * Annotation to validate each list element (is not empty).
@@ -31,7 +33,6 @@ annotation class NoNullElements(
 
 class NoNullElementsValidator : ConstraintValidator<NoNullElements, Collection<Any>> {
     override fun isValid(value: Collection<Any>?, context: ConstraintValidatorContext): Boolean {
-        // null values are valid
         if (value == null) {
             return true
         }
