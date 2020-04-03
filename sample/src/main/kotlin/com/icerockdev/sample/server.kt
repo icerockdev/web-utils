@@ -11,9 +11,6 @@ import com.icerockdev.exception.ServerErrorException
 import com.icerockdev.exception.ValidationException
 import com.icerockdev.util.QueryParser
 import com.icerockdev.util.receiveQuery
-import com.icerockdev.validation.InIntArray
-import com.icerockdev.validation.NoNullElements
-import com.icerockdev.validation.UseAnnotations
 import com.icerockdev.webserver.*
 import com.icerockdev.webserver.log.JsonDataLogger
 import com.icerockdev.webserver.log.JsonSecret
@@ -29,10 +26,6 @@ import io.ktor.routing.get
 import io.ktor.routing.post
 import io.ktor.routing.routing
 import io.ktor.util.KtorExperimentalAPI
-import javax.validation.Valid
-import javax.validation.constraints.NotBlank
-import javax.validation.constraints.NotEmpty
-import javax.validation.constraints.NotNull
 
 @KtorExperimentalAPI
 fun Application.main() {

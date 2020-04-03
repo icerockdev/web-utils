@@ -1,4 +1,8 @@
-# Ktor server
+# Web utils
+- [Ktor](https://ktor.io/) based web-server
+- HTTP (Requests, HTTP-exceptions, Query params parser)
+- Validation
+- Internationalization
 
 ## Installation
 ````kotlin
@@ -8,7 +12,7 @@ repositories {
 }
 
 // Append dependency
-implementation("com.icerockdev:web-utils:0.0.5")
+implementation("com.icerockdev:web-utils:0.1.3")
 ````
 
 ## Library usage
