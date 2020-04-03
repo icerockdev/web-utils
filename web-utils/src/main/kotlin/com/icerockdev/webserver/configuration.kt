@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.util.StdDateFormat
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.icerockdev.api.ErrorResponse
 import com.icerockdev.api.Response
+import com.icerockdev.exception.ServerErrorException
 import com.icerockdev.exception.UserException
 import io.ktor.application.Application
 import io.ktor.application.ApplicationCall
@@ -131,6 +132,9 @@ fun getMonitoringPipeline(): suspend PipelineContext<Unit, ApplicationCall>.(Uni
                 HttpStatusCode.fromValue(e.status),
                 e.getErrorResponse()
             )
+            if (e is ServerErrorException) {
+                logger.error(e.localizedMessage, e)
+            }
             proceed()
         } catch (e: Throwable) {
             call.respond(
