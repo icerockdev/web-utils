@@ -49,7 +49,7 @@ class ToolsTest {
         var age: Int = 10,
         @field:InIntListByEnum(IAvailableIntByEnum = Status::class, message = "Should it be 30 or 40")
         var status: Int = 30,
-        @field:Email(message = "Invalid email")
+        @field:StrictEmail(message = "Invalid email")
         var email: String = "test@test.er",
         @field:DateFormat(message = "Date must be in YYYY-MM-DD format", pattern = "YYYY-MM-DD")
         @field:NotNull(message = "Date is required")
@@ -79,7 +79,7 @@ class ToolsTest {
         testObj.name = null
         testObj.age = 21
         testObj.status = 10
-        testObj.email = "efwfwefewfwe"
+        testObj.email = "test@test"
         testObj.date = "Invalid date"
         testObj.passwordRepeat = "123457"
 
@@ -97,7 +97,7 @@ class ToolsTest {
         testObj.name = null
         testObj.age = 21
         testObj.status = 10
-        testObj.email = "efwfwefewfwe"
+        testObj.email = "test@test"
         testObj.date = "Invalid date"
         testObj.passwordRepeat = "123457"
 
@@ -109,7 +109,7 @@ class ToolsTest {
             ErrorDetail(message="Should it be 30 or 40", code=0),
             ErrorDetail(message="Date must be in YYYY-MM-DD format", code=0),
             ErrorDetail(message="Name is required", code=0),
-            ErrorDetail(message="Invalid email", code=0),
+            ErrorDetail(message="email определен в неверном формате", code=0),
             ErrorDetail(message="должно быть меньше или равно 14", code=0),
             ErrorDetail(message="The password fields must match", code=0)
         ).sortedArrayWith(compareBy {it.message})
@@ -117,6 +117,10 @@ class ToolsTest {
         val actualErrors = errorsResponse.dataList.map {
                 error -> error as ErrorDetail
         }.toTypedArray().sortedArrayWith(compareBy {it.message})
+
+        actualErrors.forEach { e ->
+            println(e.message)
+        }
 
         assertEquals(7, errorsResponse.dataList.size)
         assertEquals(422, errorsResponse.status)
