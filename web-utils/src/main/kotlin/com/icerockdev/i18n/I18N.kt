@@ -9,7 +9,7 @@ import java.util.*
 
 
 class I18N(
-    private val locale: Locale = Locale.getDefault(),
+    internal val locale: Locale = Locale.getDefault(),
     private val defaultCategory: String
 ) {
 
