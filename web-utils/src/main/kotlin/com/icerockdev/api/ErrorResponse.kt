@@ -19,9 +19,9 @@ class ErrorResponse() : ResponseList() {
 
     private fun setValidationParams(list: List<ErrorDetail>) {
         this.status = 422
-        this.isSuccess = false
+        this.success = false
         this.message = "Validation Error"
-        this.dataList = list
+        this.data = list
     }
 
     constructor(errorList: List<ErrorDetail>) : this() {

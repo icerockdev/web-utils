@@ -92,11 +92,11 @@ fun Application.main() {
 
 class TestRequest(val email: String, @JsonSecret val password: String) : Request()
 class TestResponse2(status: Int, val email: String, @JsonSecret val password: String) :
-    AbstractResponse(status, isSuccess = true) {
+    AbstractResponse(status, success = true) {
 }
 
 class TestResponse(status: Int, message: String) :
-    AbstractResponse(status, message, isSuccess = true) {
+    AbstractResponse(status, message, success = true) {
     @JsonSecret
     val data = message
 }

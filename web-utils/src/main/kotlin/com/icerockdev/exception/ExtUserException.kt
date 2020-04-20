@@ -4,24 +4,22 @@
 
 package com.icerockdev.exception
 
-import com.fasterxml.jackson.annotation.JsonProperty
 import com.icerockdev.api.ErrorResponse
 
 abstract class ExtUserException(status: Int, message: String) :
     UserException(status, message) {
-    @JsonProperty("data")
-    open var dataList: List<ErrorDetail> = mutableListOf()
+    open var data: List<ErrorDetail> = mutableListOf()
 
     override fun getErrorResponse(): ErrorResponse {
         return ErrorResponse().also {
             it.status = this.status
             it.message = this.message.toString()
-            it.isSuccess = false
-            it.dataList = dataList
+            it.success = false
+            it.data = data
         }
     }
 
     protected fun setErrors(list: List<ErrorDetail>) {
-        this.dataList = list
+        this.data = list
     }
 }

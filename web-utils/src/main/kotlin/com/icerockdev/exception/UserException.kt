@@ -15,7 +15,7 @@ abstract class UserException(
         return ErrorResponse().also {
             it.status = this.status
             it.message = this.message ?: ""
-            it.isSuccess = false
+            it.success = false
         }
     }
 }

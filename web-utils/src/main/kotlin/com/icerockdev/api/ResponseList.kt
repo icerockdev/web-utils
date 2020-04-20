@@ -4,12 +4,10 @@
 
 package com.icerockdev.api
 
-import com.fasterxml.jackson.annotation.JsonProperty
 import com.icerockdev.webserver.tools.DateTimeUtil
 
 open class ResponseList(
-    @JsonProperty("data")
-    open var dataList: List<Any> = listOf(),
+    open var data: List<Any> = listOf(),
     status: Int = 200,
     message: String = "",
     timestamp: Long = DateTimeUtil.getTimestamp(),
