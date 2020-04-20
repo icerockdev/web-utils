@@ -45,7 +45,7 @@ fun getStatusConfiguration(): StatusPages.Configuration.() -> Unit {
             val error = ErrorResponse().also {
                 it.status = status.value
                 it.message = "Unauthorized"
-                it.isSuccess = false
+                it.success = false
             }
             call.respond(
                 status,

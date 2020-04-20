@@ -4,14 +4,12 @@
 
 package com.icerockdev.api
 
-import com.fasterxml.jackson.annotation.JsonProperty
 import com.icerockdev.webserver.tools.DateTimeUtil
 
 abstract class AbstractResponse(
     var status: Int = 0,
     var message: String = "",
     var timestamp: Long = DateTimeUtil.getTimestamp(),
-    @JsonProperty("success")
-    var isSuccess: Boolean = false
+    var success: Boolean = false
 ) {
 }

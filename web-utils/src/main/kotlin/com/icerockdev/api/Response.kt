@@ -4,11 +4,9 @@
 
 package com.icerockdev.api
 
-import com.fasterxml.jackson.annotation.JsonProperty
 import com.icerockdev.webserver.tools.DateTimeUtil
 
 open class Response(
-    @JsonProperty("data")
     open var data: Any? = null,
     status: Int = 200,
     message: String = "",

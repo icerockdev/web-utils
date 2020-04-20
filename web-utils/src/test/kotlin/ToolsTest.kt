@@ -7,11 +7,9 @@ import com.icerockdev.api.ErrorResponse
 import com.icerockdev.api.Request
 import com.icerockdev.exception.ErrorDetail
 import com.icerockdev.exception.UserException
-import com.icerockdev.i18n.I18N
 import com.icerockdev.validation.*
 import org.junit.Assert.assertArrayEquals
 import org.junit.Test
-import java.util.*
 import javax.validation.constraints.*
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -114,7 +112,7 @@ class ToolsTest {
             ErrorDetail(message="The password fields must match", code=0)
         ).sortedArrayWith(compareBy {it.message})
 
-        val actualErrors = errorsResponse.dataList.map {
+        val actualErrors = errorsResponse.data.map {
                 error -> error as ErrorDetail
         }.toTypedArray().sortedArrayWith(compareBy {it.message})
 
@@ -122,11 +120,11 @@ class ToolsTest {
             println(e.message)
         }
 
-        assertEquals(7, errorsResponse.dataList.size)
+        assertEquals(7, errorsResponse.data.size)
         assertEquals(422, errorsResponse.status)
         assertEquals("Validation Error", errorsResponse.message)
-        assertEquals(false, errorsResponse.isSuccess)
-        assertEquals(errorsResponse.dataList.count(), errorsResponse.totalCount)
+        assertEquals(false, errorsResponse.success)
+        assertEquals(errorsResponse.data.count(), errorsResponse.totalCount)
         assertArrayEquals(expectedErrors, actualErrors)
     }
 
@@ -143,14 +141,14 @@ class ToolsTest {
             ErrorDetail(message="Should it be 10 or 20", code=0)
         ).sortedArrayWith(compareBy {it.message})
 
-        val actualErrors = errorsResponse.dataList.map {
+        val actualErrors = errorsResponse.data.map {
                 error -> error as ErrorDetail
         }.toTypedArray().sortedArrayWith(compareBy {it.message})
 
-        assertEquals(1, errorsResponse.dataList.size)
+        assertEquals(1, errorsResponse.data.size)
         assertEquals(422, errorsResponse.status)
         assertEquals("Validation Error", errorsResponse.message)
-        assertEquals(false, errorsResponse.isSuccess)
+        assertEquals(false, errorsResponse.success)
         assertArrayEquals(expectedErrors, actualErrors)
     }
 
@@ -162,9 +160,9 @@ class ToolsTest {
         val result = CustomException(403, "UserException").getErrorResponse()
         result.timestamp = 1566554901677
 
-        assertEquals(0, result.dataList.size)
+        assertEquals(0, result.data.size)
         assertEquals(403, result.status)
         assertEquals("UserException", result.message)
-        assertEquals(false, result.isSuccess)
+        assertEquals(false, result.success)
     }
 }
