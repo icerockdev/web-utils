@@ -7,8 +7,8 @@ package com.icerockdev.api
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.icerockdev.exception.ValidatorException
 import javax.validation.*
+import kotlin.reflect.KClass
 import kotlin.reflect.full.memberProperties
-
 
 /*
 * Annotations docs for Kotlin - https://kotlinlang.org/docs/reference/annotations.html?_ga=2.133813446.951009214.1566383426-111422153.1543224819#annotation-use-site-targets
@@ -17,12 +17,12 @@ import kotlin.reflect.full.memberProperties
  */
 abstract class Request(
     private val messageInterpolator: MessageInterpolator? = null,
-    validatorBuilder: ValidatorFactory = Validation.byDefaultProvider().configure()
+    validatorFactory: ValidatorFactory = Validation.byDefaultProvider()
+        .configure()
         .messageInterpolator(messageInterpolator)
         .buildValidatorFactory()
 ) {
-
-    private val validator: Validator? = validatorBuilder.validator
+    private val validator: Validator? = validatorFactory.validator
 
     fun validate(): Set<ConstraintViolation<Request>> {
         if (validator == null) {
@@ -32,9 +32,41 @@ abstract class Request(
         return validator.validate(this)
     }
 
+    fun validateRecursive(propertyPath: String = "*"): Set<ConstraintViolation<Request>> {
+        val constraintSet = validate().toMutableSet()
+
+        @Suppress("UNCHECKED_CAST")
+        val self = this::class as KClass<Request>
+        val kProperties = self.memberProperties
+
+        for (kProperty in kProperties) {
+            val property = kProperty.get(this)
+            val propertyName = kProperty.name
+            when (property) {
+                is Request -> {
+                    constraintSet.addAll(property.validateRecursive("$propertyPath -> $propertyName"))
+                }
+                is List<*> -> {
+                    property.forEach { listItem ->
+                        if (listItem is Request) {
+                            constraintSet.addAll(listItem.validateRecursive("$propertyPath -> $propertyName"))
+                        }
+                    }
+                }
+            }
+        }
+
+        return constraintSet
+    }
+
     @JsonIgnore
     fun isValid(): Boolean {
         return validate().isEmpty()
+    }
+
+    @JsonIgnore
+    fun isValidRecursive(): Boolean {
+        return validateRecursive().isEmpty()
     }
 
     @JsonIgnore
