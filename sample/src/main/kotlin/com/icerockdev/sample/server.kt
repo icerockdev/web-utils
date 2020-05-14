@@ -14,6 +14,7 @@ import com.icerockdev.util.receiveQuery
 import com.icerockdev.webserver.*
 import com.icerockdev.webserver.log.JsonDataLogger
 import com.icerockdev.webserver.log.JsonSecret
+import com.icerockdev.webserver.log.jsonLogger
 import com.icerockdev.webserver.tools.receiveRequest
 import io.ktor.application.Application
 import io.ktor.application.ApplicationCallPipeline
@@ -59,16 +60,18 @@ fun Application.main() {
             call.respond("!!!")
         }
 
-        get("/object") {
-            call.respond(TestResponse(200, "some message"))
-        }
-
-        post("/object") {
-            val request = call.receiveRequest<TestRequest>()
-            if (!request.isValid()) {
-                throw ValidationException(request.validate())
+        jsonLogger {
+            get("/object") {
+                call.respond(TestResponse(200, "some message"))
             }
-            call.respond(TestResponse2(200, request.email, request.password))
+
+            post("/object") {
+                val request = call.receiveRequest<TestRequest>()
+                if (!request.isValid()) {
+                    throw ValidationException(request.validate())
+                }
+                call.respond(TestResponse2(200, request.email, request.password))
+            }
         }
 
         get("/exception") {
