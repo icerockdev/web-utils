@@ -18,10 +18,12 @@ import com.icerockdev.webserver.log.JsonSecret
 import com.icerockdev.webserver.log.LoggingConfiguration
 import com.icerockdev.webserver.log.jsonLogger
 import com.icerockdev.webserver.tools.receiveRequest
-import io.ktor.application.*
+import io.ktor.application.Application
+import io.ktor.application.ApplicationCallPipeline
+import io.ktor.application.call
+import io.ktor.application.install
 import io.ktor.features.*
 import io.ktor.jackson.jackson
-import io.ktor.request.httpMethod
 import io.ktor.response.respond
 import io.ktor.routing.get
 import io.ktor.routing.post
@@ -37,12 +39,9 @@ fun Application.main() {
     }
     install(DefaultHeaders)
     install(CallLogging) {
-        applyDefaultLogging {
-            mdc(Constants.LOG_FIELD_HTTP_METHOD) { call: ApplicationCall ->
-                call.request.httpMethod.value
-            }
-        }
-        // applyApiFilter()
+        applyDefaultLogging()
+        // Log only /api requests
+        // filter { call -> call.request.path().startsWith("/api") }
     }
     install(JsonDataLogger) {
         mapperConfiguration = getObjectMapper {

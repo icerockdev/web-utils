@@ -85,7 +85,7 @@ fun applyDefaultCORS(): CORS.Configuration.() -> Unit {
     }
 }
 
-fun applyDefaultLogging(configure: CallLogging.Configuration.() -> Unit): CallLogging.Configuration.() -> Unit {
+fun applyDefaultLogging(configure: CallLogging.Configuration.() -> Unit = {}): CallLogging.Configuration.() -> Unit {
     return {
         level = Level.TRACE
         callIdMdc(Constants.LOG_FIELD_TRACE_UUID)
@@ -103,11 +103,6 @@ fun applyDefaultLogging(configure: CallLogging.Configuration.() -> Unit): CallLo
         }
         apply(configure)
     }
-}
-
-fun CallLogging.Configuration.applyApiFilter(): CallLogging.Configuration {
-    filter { call -> call.request.path().startsWith("/api") }
-    return this
 }
 
 private fun entriesToString(entries: Set<Map.Entry<String, List<String>>>): String {
