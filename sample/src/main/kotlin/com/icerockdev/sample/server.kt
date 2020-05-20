@@ -13,9 +13,9 @@ import com.icerockdev.exception.ValidationException
 import com.icerockdev.util.QueryParser
 import com.icerockdev.util.receiveQuery
 import com.icerockdev.webserver.*
-import com.icerockdev.webserver.log.LoggingConfiguration
 import com.icerockdev.webserver.log.JsonDataLogger
 import com.icerockdev.webserver.log.JsonSecret
+import com.icerockdev.webserver.log.LoggingConfiguration
 import com.icerockdev.webserver.log.jsonLogger
 import com.icerockdev.webserver.tools.receiveRequest
 import io.ktor.application.*

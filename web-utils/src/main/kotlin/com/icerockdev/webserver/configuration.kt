@@ -105,10 +105,9 @@ fun applyDefaultLogging(configure: CallLogging.Configuration.() -> Unit): CallLo
     }
 }
 
-fun applyApiFilter(): CallLogging.Configuration.() -> Unit {
-    return {
-        filter { call -> call.request.path().startsWith("/api") }
-    }
+fun CallLogging.Configuration.applyApiFilter(): CallLogging.Configuration {
+    filter { call -> call.request.path().startsWith("/api") }
+    return this
 }
 
 private fun entriesToString(entries: Set<Map.Entry<String, List<String>>>): String {
