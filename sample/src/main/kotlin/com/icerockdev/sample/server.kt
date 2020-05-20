@@ -12,7 +12,7 @@ import com.icerockdev.exception.ValidationException
 import com.icerockdev.util.QueryParser
 import com.icerockdev.util.receiveQuery
 import com.icerockdev.webserver.*
-import com.icerockdev.webserver.log.CustomLoggingConfiguration
+import com.icerockdev.webserver.log.LoggingConfiguration
 import com.icerockdev.webserver.log.JsonDataLogger
 import com.icerockdev.webserver.log.JsonSecret
 import com.icerockdev.webserver.log.jsonLogger
@@ -42,7 +42,8 @@ fun Application.main() {
     }
     install(JsonDataLogger) {
         mapperConfiguration = getObjectMapper()
-        customLoggingConfiguration = CustomLoggingConfiguration(responseTypes = listOf(CustomResponse::class))
+        loggingConfiguration =
+            LoggingConfiguration(responseTypes = listOf(AbstractResponse::class, CustomResponse::class))
     }
     install(CallId, getCallConfiguration())
     install(ContentNegotiation) {

@@ -16,8 +16,6 @@ import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer
 import com.fasterxml.jackson.databind.ser.std.StdScalarSerializer
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.icerockdev.api.AbstractResponse
-import com.icerockdev.api.Request
 import com.icerockdev.webserver.Constants
 import com.icerockdev.webserver.Environment
 import io.ktor.application.*
@@ -47,7 +45,7 @@ class JsonDataLogger(configure: Configuration.() -> Unit) {
         var responseStatusCodeName: String = Constants.LOG_FIELD_STATUS_CODE
         var appEnvName: String = Constants.LOG_FIELD_ENV
         var systemEnvKey: String = "env"
-        var customLoggingConfiguration: CustomLoggingConfiguration = CustomLoggingConfiguration()
+        var loggingConfiguration: LoggingConfiguration = LoggingConfiguration()
     }
 
     init {
@@ -80,10 +78,7 @@ class JsonDataLogger(configure: Configuration.() -> Unit) {
         // response data intercept
         pipeline.sendPipeline.insertPhaseBefore(ApplicationSendPipeline.Render, LoggingPhase)
         pipeline.sendPipeline.intercept(LoggingPhase) { subject ->
-            if (subject is AbstractResponse) {
-                MDC.put(configuration.responseBodyName, mapper.writeValueAsString(subject))
-            }
-            configuration.customLoggingConfiguration.responseTypes.forEach { type ->
+            configuration.loggingConfiguration.responseTypes.forEach { type ->
                 if (type.isInstance(subject)) {
                     MDC.put(configuration.responseBodyName, mapper.writeValueAsString(subject))
                 }
@@ -94,10 +89,7 @@ class JsonDataLogger(configure: Configuration.() -> Unit) {
         pipeline.receivePipeline.insertPhaseBefore(ApplicationReceivePipeline.After, LoggingPhase)
         pipeline.receivePipeline.intercept(LoggingPhase) { request ->
             val requestValue = request.value
-            if (requestValue is Request) {
-                MDC.put(configuration.requestBodyName, mapper.writeValueAsString(requestValue))
-            }
-            configuration.customLoggingConfiguration.requestTypes.forEach { type ->
+            configuration.loggingConfiguration.requestTypes.forEach { type ->
                 if (type.isInstance(requestValue)) {
                     MDC.put(configuration.requestBodyName, mapper.writeValueAsString(requestValue))
                 }
