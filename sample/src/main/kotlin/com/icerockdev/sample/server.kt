@@ -4,6 +4,7 @@
 
 package com.icerockdev.sample
 
+import com.fasterxml.jackson.databind.SerializationFeature
 import com.icerockdev.api.AbstractResponse
 import com.icerockdev.api.Request
 import com.icerockdev.exception.ForbiddenException
@@ -17,12 +18,10 @@ import com.icerockdev.webserver.log.JsonDataLogger
 import com.icerockdev.webserver.log.JsonSecret
 import com.icerockdev.webserver.log.jsonLogger
 import com.icerockdev.webserver.tools.receiveRequest
-import io.ktor.application.Application
-import io.ktor.application.ApplicationCallPipeline
-import io.ktor.application.call
-import io.ktor.application.install
+import io.ktor.application.*
 import io.ktor.features.*
 import io.ktor.jackson.jackson
+import io.ktor.request.httpMethod
 import io.ktor.response.respond
 import io.ktor.routing.get
 import io.ktor.routing.post
@@ -38,10 +37,17 @@ fun Application.main() {
     }
     install(DefaultHeaders)
     install(CallLogging) {
-        applyDefaultLogging()
+        applyDefaultLogging {
+            mdc(Constants.LOG_FIELD_HTTP_METHOD) { call: ApplicationCall ->
+                call.request.httpMethod.value
+            }
+            // applyApiFilter()
+        }
     }
     install(JsonDataLogger) {
-        mapperConfiguration = getObjectMapper()
+        mapperConfiguration = getObjectMapper {
+            configure(SerializationFeature.INDENT_OUTPUT, false)
+        }
         loggingConfiguration =
             LoggingConfiguration(responseTypes = listOf(AbstractResponse::class, CustomResponse::class))
     }

@@ -71,40 +71,44 @@ fun getStatusConfiguration(): StatusPages.Configuration.() -> Unit {
     }
 }
 
-fun CORS.Configuration.applyDefaultCORS(): CORS.Configuration {
-    method(HttpMethod.Options)
-    method(HttpMethod.Put)
-    method(HttpMethod.Delete)
-    method(HttpMethod.Patch)
-    header(HttpHeaders.Authorization)
-    header("X-Total-Count")
-    exposeHeader("X-Total-Count")
-    allowCredentials = true
-    allowNonSimpleContentTypes = true
-    return this
+fun applyDefaultCORS(): CORS.Configuration.() -> Unit {
+    return {
+        method(HttpMethod.Options)
+        method(HttpMethod.Put)
+        method(HttpMethod.Delete)
+        method(HttpMethod.Patch)
+        header(HttpHeaders.Authorization)
+        header("X-Total-Count")
+        exposeHeader("X-Total-Count")
+        allowCredentials = true
+        allowNonSimpleContentTypes = true
+    }
 }
 
-fun CallLogging.Configuration.applyDefaultLogging(): CallLogging.Configuration {
-    level = Level.TRACE
-    callIdMdc(Constants.LOG_FIELD_TRACE_UUID)
-    mdc(Constants.LOG_FIELD_HEADERS) { call: ApplicationCall ->
-        entriesToString(call.request.headers.entries())
+fun applyDefaultLogging(configure: CallLogging.Configuration.() -> Unit): CallLogging.Configuration.() -> Unit {
+    return {
+        level = Level.TRACE
+        callIdMdc(Constants.LOG_FIELD_TRACE_UUID)
+        mdc(Constants.LOG_FIELD_HEADERS) { call: ApplicationCall ->
+            entriesToString(call.request.headers.entries())
+        }
+        mdc(Constants.LOG_FIELD_QUERY_PARAMETERS) { call: ApplicationCall ->
+            entriesToString(call.request.queryParameters.entries())
+        }
+        mdc(Constants.LOG_FIELD_HTTP_METHOD) { call: ApplicationCall ->
+            call.request.httpMethod.value
+        }
+        mdc(Constants.LOG_FIELD_REQUEST_PATH) { call: ApplicationCall ->
+            call.request.path()
+        }
+        apply(configure)
     }
-    mdc(Constants.LOG_FIELD_QUERY_PARAMETERS) { call: ApplicationCall ->
-        entriesToString(call.request.queryParameters.entries())
-    }
-    mdc(Constants.LOG_FIELD_HTTP_METHOD) { call: ApplicationCall ->
-        call.request.httpMethod.value
-    }
-    mdc(Constants.LOG_FIELD_REQUEST_PATH) { call: ApplicationCall ->
-        call.request.path()
-    }
-    return this
 }
 
-fun CallLogging.Configuration.applyApiFilter(): CallLogging.Configuration {
-    filter { call -> call.request.path().startsWith("/api") }
-    return this
+fun applyApiFilter(): CallLogging.Configuration.() -> Unit {
+    return {
+        filter { call -> call.request.path().startsWith("/api") }
+    }
 }
 
 private fun entriesToString(entries: Set<Map.Entry<String, List<String>>>): String {
@@ -112,12 +116,13 @@ private fun entriesToString(entries: Set<Map.Entry<String, List<String>>>): Stri
 }
 
 
-fun getObjectMapper(): ObjectMapper.() -> Unit {
+fun getObjectMapper(configure: ObjectMapper.() -> Unit = {}): ObjectMapper.() -> Unit {
     return {
         configure(SerializationFeature.INDENT_OUTPUT, true)
         disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
         disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
         dateFormat = StdDateFormat()
+        apply(configure)
         registerKotlinModule()
     }
 }
