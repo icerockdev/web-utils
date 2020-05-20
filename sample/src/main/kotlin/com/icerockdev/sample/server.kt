@@ -41,8 +41,8 @@ fun Application.main() {
             mdc(Constants.LOG_FIELD_HTTP_METHOD) { call: ApplicationCall ->
                 call.request.httpMethod.value
             }
-            // applyApiFilter()
         }
+        // applyApiFilter()
     }
     install(JsonDataLogger) {
         mapperConfiguration = getObjectMapper {
