@@ -1,4 +1,15 @@
+GET http://127.0.0.1:8080/
+Accept: text/plain
+
+###
+
+GET http://127.0.0.1:8080/object
+Accept: application/json
+
+###
+
 POST http://127.0.0.1:8080/object
+Accept: application/json
 Content-Type: application/json
 
 {
@@ -7,22 +18,28 @@ Content-Type: application/json
 }
 
 ###
+
+GET http://127.0.0.1:8080/custom-object
+Accept: application/json
+
+###
+
 GET http://127.0.0.1:8080/exception
-accept: application/json
+Accept: application/json
 
 ###
 
 GET http://127.0.0.1:8080/handled
-accept: application/json
+Accept: application/json
 
 ###
 
 GET http://127.0.0.1:8080/handled2
-accept: application/json
+Accept: application/json
 
 ###
 
 GET http://127.0.0.1:8080/get?age=10&TestValue=20&email=a@a.com&test=10&test=20&test&tmp=1&tmp=2&tmp=3
-accept: application/json
+Accept: application/json
 
 ###

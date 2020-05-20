@@ -11,5 +11,4 @@ abstract class AbstractResponse(
     var message: String = "",
     var timestamp: Long = DateTimeUtil.getTimestamp(),
     var success: Boolean = false
-) {
-}
+)

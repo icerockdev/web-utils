@@ -36,6 +36,7 @@ class JsonDataLogger(configure: Configuration.() -> Unit) {
 
     private val mapper: ObjectMapper
     private val configuration: Configuration
+
     /**
      * Configuration type for [JsonDataLogger] feature
      */
@@ -46,6 +47,7 @@ class JsonDataLogger(configure: Configuration.() -> Unit) {
         var responseStatusCodeName: String = Constants.LOG_FIELD_STATUS_CODE
         var appEnvName: String = Constants.LOG_FIELD_ENV
         var systemEnvKey: String = "env"
+        var customLoggingConfiguration: CustomLoggingConfiguration = CustomLoggingConfiguration()
     }
 
     init {
@@ -81,6 +83,11 @@ class JsonDataLogger(configure: Configuration.() -> Unit) {
             if (subject is AbstractResponse) {
                 MDC.put(configuration.responseBodyName, mapper.writeValueAsString(subject))
             }
+            configuration.customLoggingConfiguration.responseTypes.forEach { type ->
+                if (type.isInstance(subject)) {
+                    MDC.put(configuration.responseBodyName, mapper.writeValueAsString(subject))
+                }
+            }
         }
 
         // Received data intercept
@@ -89,6 +96,11 @@ class JsonDataLogger(configure: Configuration.() -> Unit) {
             val requestValue = request.value
             if (requestValue is Request) {
                 MDC.put(configuration.requestBodyName, mapper.writeValueAsString(requestValue))
+            }
+            configuration.customLoggingConfiguration.requestTypes.forEach { type ->
+                if (type.isInstance(requestValue)) {
+                    MDC.put(configuration.requestBodyName, mapper.writeValueAsString(requestValue))
+                }
             }
         }
 

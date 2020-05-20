@@ -12,5 +12,4 @@ open class Response(
     message: String = "",
     timestamp: Long = DateTimeUtil.getTimestamp(),
     isSuccess: Boolean = true
-) : AbstractResponse(status, message, timestamp, isSuccess) {
-}
+) : AbstractResponse(status, message, timestamp, isSuccess)
