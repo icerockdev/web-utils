@@ -28,5 +28,4 @@ class ErrorResponse() : ResponseList() {
         setValidationParams(errorList)
         totalCount = errorList.count()
     }
-
 }

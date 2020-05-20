@@ -12,6 +12,7 @@ import com.icerockdev.exception.ValidationException
 import com.icerockdev.util.QueryParser
 import com.icerockdev.util.receiveQuery
 import com.icerockdev.webserver.*
+import com.icerockdev.webserver.log.LoggingConfiguration
 import com.icerockdev.webserver.log.JsonDataLogger
 import com.icerockdev.webserver.log.JsonSecret
 import com.icerockdev.webserver.log.jsonLogger
@@ -41,6 +42,8 @@ fun Application.main() {
     }
     install(JsonDataLogger) {
         mapperConfiguration = getObjectMapper()
+        loggingConfiguration =
+            LoggingConfiguration(responseTypes = listOf(AbstractResponse::class, CustomResponse::class))
     }
     install(CallId, getCallConfiguration())
     install(ContentNegotiation) {
@@ -71,6 +74,10 @@ fun Application.main() {
                     throw ValidationException(request.validate())
                 }
                 call.respond(TestResponse2(200, request.email, request.password))
+            }
+
+            get("/custom-object") {
+                call.respond(CustomResponse(200, "Custom message", listOf(1, 2, 3)))
             }
         }
 
@@ -103,6 +110,8 @@ class TestResponse(status: Int, message: String) :
     @JsonSecret
     val data = message
 }
+
+class CustomResponse(var status: Int, var message: String, var list: List<Int>)
 
 data class QueryValues(
     private val email: String = "",
