@@ -85,7 +85,7 @@ fun applyDefaultCORS(): CORS.Configuration.() -> Unit {
     }
 }
 
-fun applyDefaultLogging(configure: CallLogging.Configuration.() -> Unit = {}): CallLogging.Configuration.() -> Unit {
+fun applyDefaultLogging(): CallLogging.Configuration.() -> Unit {
     return {
         level = Level.TRACE
         callIdMdc(Constants.LOG_FIELD_TRACE_UUID)
@@ -101,7 +101,6 @@ fun applyDefaultLogging(configure: CallLogging.Configuration.() -> Unit = {}): C
         mdc(Constants.LOG_FIELD_REQUEST_PATH) { call: ApplicationCall ->
             call.request.path()
         }
-        apply(configure)
     }
 }
 
