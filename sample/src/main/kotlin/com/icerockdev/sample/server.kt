@@ -4,6 +4,7 @@
 
 package com.icerockdev.sample
 
+import com.fasterxml.jackson.databind.SerializationFeature
 import com.icerockdev.api.AbstractResponse
 import com.icerockdev.api.Request
 import com.icerockdev.exception.ForbiddenException
@@ -12,9 +13,9 @@ import com.icerockdev.exception.ValidationException
 import com.icerockdev.util.QueryParser
 import com.icerockdev.util.receiveQuery
 import com.icerockdev.webserver.*
-import com.icerockdev.webserver.log.LoggingConfiguration
 import com.icerockdev.webserver.log.JsonDataLogger
 import com.icerockdev.webserver.log.JsonSecret
+import com.icerockdev.webserver.log.LoggingConfiguration
 import com.icerockdev.webserver.log.jsonLogger
 import com.icerockdev.webserver.tools.receiveRequest
 import io.ktor.application.Application
@@ -31,7 +32,10 @@ import io.ktor.util.KtorExperimentalAPI
 
 @KtorExperimentalAPI
 fun Application.main() {
-    install(StatusPages, getStatusConfiguration())
+    install(StatusPages) {
+        applyStatusConfiguration()
+    }
+
     install(CORS) {
         applyDefaultCORS()
         anyHost() // @TODO: Don't do this in production if possible. Try to limit it.
@@ -39,18 +43,32 @@ fun Application.main() {
     install(DefaultHeaders)
     install(CallLogging) {
         applyDefaultLogging()
+        // Log only /api requests
+        // filter { call -> call.request.path().startsWith("/api") }
     }
     install(JsonDataLogger) {
-        mapperConfiguration = getObjectMapper()
+        mapperConfiguration = {
+            applyObjectMapper()
+        }
         loggingConfiguration =
-            LoggingConfiguration(responseTypes = listOf(AbstractResponse::class, CustomResponse::class))
+            LoggingConfiguration(
+                responseTypes = listOf(AbstractResponse::class, CustomResponse::class),
+                requestTypes = listOf(Request::class)
+            )
     }
-    install(CallId, getCallConfiguration())
+    install(CallId) {
+        applyCallConfiguration()
+    }
     install(ContentNegotiation) {
-        jackson(block = getObjectMapper())
+        jackson() {
+            applyObjectMapper()
+            configure(SerializationFeature.INDENT_OUTPUT, false)
+        }
     }
     install(QueryParser) {
-        mapperConfiguration = getObjectMapper()
+        mapperConfiguration = {
+            applyObjectMapper()
+        }
     }
 
     /**
