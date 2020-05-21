@@ -32,7 +32,10 @@ import io.ktor.util.KtorExperimentalAPI
 
 @KtorExperimentalAPI
 fun Application.main() {
-    install(StatusPages, getStatusConfiguration())
+    install(StatusPages) {
+        applyStatusConfiguration()
+    }
+
     install(CORS) {
         applyDefaultCORS()
         anyHost() // @TODO: Don't do this in production if possible. Try to limit it.
@@ -44,18 +47,28 @@ fun Application.main() {
         // filter { call -> call.request.path().startsWith("/api") }
     }
     install(JsonDataLogger) {
-        mapperConfiguration = getObjectMapper {
-            configure(SerializationFeature.INDENT_OUTPUT, false)
+        mapperConfiguration = {
+            applyObjectMapper()
         }
         loggingConfiguration =
-            LoggingConfiguration(responseTypes = listOf(AbstractResponse::class, CustomResponse::class))
+            LoggingConfiguration(
+                responseTypes = listOf(AbstractResponse::class, CustomResponse::class),
+                requestTypes = listOf(Request::class)
+            )
     }
-    install(CallId, getCallConfiguration())
+    install(CallId) {
+        applyCallConfiguration()
+    }
     install(ContentNegotiation) {
-        jackson(block = getObjectMapper())
+        jackson() {
+            applyObjectMapper()
+            configure(SerializationFeature.INDENT_OUTPUT, false)
+        }
     }
     install(QueryParser) {
-        mapperConfiguration = getObjectMapper()
+        mapperConfiguration = {
+            applyObjectMapper()
+        }
     }
 
     /**

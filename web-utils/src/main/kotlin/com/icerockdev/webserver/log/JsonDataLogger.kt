@@ -16,6 +16,8 @@ import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer
 import com.fasterxml.jackson.databind.ser.std.StdScalarSerializer
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.icerockdev.api.AbstractResponse
+import com.icerockdev.api.Request
 import com.icerockdev.webserver.Constants
 import com.icerockdev.webserver.Environment
 import io.ktor.application.*
@@ -45,7 +47,10 @@ class JsonDataLogger(configure: Configuration.() -> Unit) {
         var responseStatusCodeName: String = Constants.LOG_FIELD_STATUS_CODE
         var appEnvName: String = Constants.LOG_FIELD_ENV
         var systemEnvKey: String = "env"
-        var loggingConfiguration: LoggingConfiguration = LoggingConfiguration()
+        var loggingConfiguration: LoggingConfiguration = LoggingConfiguration(
+            requestTypes = listOf(Request::class),
+            responseTypes = listOf(AbstractResponse::class)
+        )
     }
 
     init {

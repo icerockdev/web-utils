@@ -28,79 +28,72 @@ import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
 import java.util.*
 
-fun getStatusConfiguration(): StatusPages.Configuration.() -> Unit {
-
-    return {
-        status(HttpStatusCode.NotFound) { status ->
-            val error = ErrorResponse().also {
-                it.status = status.value
-                it.message = "Route not found"
-            }
-            call.respond(
-                status,
-                error
-            )
+fun StatusPages.Configuration.applyStatusConfiguration() {
+    status(HttpStatusCode.NotFound) { status ->
+        val error = ErrorResponse().also {
+            it.status = status.value
+            it.message = "Route not found"
         }
-        status(HttpStatusCode.Unauthorized) { status ->
-            val error = ErrorResponse().also {
-                it.status = status.value
-                it.message = "Unauthorized"
-                it.success = false
-            }
-            call.respond(
-                status,
-                error
-            )
+        call.respond(
+            status,
+            error
+        )
+    }
+    status(HttpStatusCode.Unauthorized) { status ->
+        val error = ErrorResponse().also {
+            it.status = status.value
+            it.message = "Unauthorized"
+            it.success = false
         }
-        exception<UserException> { cause ->
-            call.respond(
-                HttpStatusCode(cause.status, cause.message.toString()),
-                cause.getErrorResponse()
-            )
+        call.respond(
+            status,
+            error
+        )
+    }
+    exception<UserException> { cause ->
+        call.respond(
+            HttpStatusCode(cause.status, cause.message.toString()),
+            cause.getErrorResponse()
+        )
+    }
+    exception<Throwable> { cause ->
+        val error = ErrorResponse().also {
+            it.status = HttpStatusCode.InternalServerError.value
+            it.message = cause.message.toString()
         }
-        exception<Throwable> { cause ->
-            val error = ErrorResponse().also {
-                it.status = HttpStatusCode.InternalServerError.value
-                it.message = cause.message.toString()
-            }
-            call.respond(
-                HttpStatusCode.InternalServerError,
-                error
-            )
-        }
+        call.respond(
+            HttpStatusCode.InternalServerError,
+            error
+        )
     }
 }
 
-fun applyDefaultCORS(): CORS.Configuration.() -> Unit {
-    return {
-        method(HttpMethod.Options)
-        method(HttpMethod.Put)
-        method(HttpMethod.Delete)
-        method(HttpMethod.Patch)
-        header(HttpHeaders.Authorization)
-        header("X-Total-Count")
-        exposeHeader("X-Total-Count")
-        allowCredentials = true
-        allowNonSimpleContentTypes = true
-    }
+fun CORS.Configuration.applyDefaultCORS() {
+    method(HttpMethod.Options)
+    method(HttpMethod.Put)
+    method(HttpMethod.Delete)
+    method(HttpMethod.Patch)
+    header(HttpHeaders.Authorization)
+    header("X-Total-Count")
+    exposeHeader("X-Total-Count")
+    allowCredentials = true
+    allowNonSimpleContentTypes = true
 }
 
-fun applyDefaultLogging(): CallLogging.Configuration.() -> Unit {
-    return {
-        level = Level.TRACE
-        callIdMdc(Constants.LOG_FIELD_TRACE_UUID)
-        mdc(Constants.LOG_FIELD_HEADERS) { call: ApplicationCall ->
-            entriesToString(call.request.headers.entries())
-        }
-        mdc(Constants.LOG_FIELD_QUERY_PARAMETERS) { call: ApplicationCall ->
-            entriesToString(call.request.queryParameters.entries())
-        }
-        mdc(Constants.LOG_FIELD_HTTP_METHOD) { call: ApplicationCall ->
-            call.request.httpMethod.value
-        }
-        mdc(Constants.LOG_FIELD_REQUEST_PATH) { call: ApplicationCall ->
-            call.request.path()
-        }
+fun CallLogging.Configuration.applyDefaultLogging() {
+    level = Level.TRACE
+    callIdMdc(Constants.LOG_FIELD_TRACE_UUID)
+    mdc(Constants.LOG_FIELD_HEADERS) { call: ApplicationCall ->
+        entriesToString(call.request.headers.entries())
+    }
+    mdc(Constants.LOG_FIELD_QUERY_PARAMETERS) { call: ApplicationCall ->
+        entriesToString(call.request.queryParameters.entries())
+    }
+    mdc(Constants.LOG_FIELD_HTTP_METHOD) { call: ApplicationCall ->
+        call.request.httpMethod.value
+    }
+    mdc(Constants.LOG_FIELD_REQUEST_PATH) { call: ApplicationCall ->
+        call.request.path()
     }
 }
 
@@ -109,15 +102,12 @@ private fun entriesToString(entries: Set<Map.Entry<String, List<String>>>): Stri
 }
 
 
-fun getObjectMapper(configure: ObjectMapper.() -> Unit = {}): ObjectMapper.() -> Unit {
-    return {
-        configure(SerializationFeature.INDENT_OUTPUT, true)
-        disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-        disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-        dateFormat = StdDateFormat()
-        apply(configure)
-        registerKotlinModule()
-    }
+fun ObjectMapper.applyObjectMapper() {
+    configure(SerializationFeature.INDENT_OUTPUT, true)
+    disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+    disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+    dateFormat = StdDateFormat()
+    registerKotlinModule()
 }
 
 fun getMonitoringPipeline(): suspend PipelineContext<Unit, ApplicationCall>.(Unit) -> Unit {
@@ -137,11 +127,11 @@ fun getMonitoringPipeline(): suspend PipelineContext<Unit, ApplicationCall>.(Uni
         } catch (e: Throwable) {
             call.respond(
                 HttpStatusCode.InternalServerError,
-                object : Response(
+                Response(
                     status = HttpStatusCode.InternalServerError.value,
                     message = e.message ?: "",
                     isSuccess = false
-                ) {}
+                )
             )
             proceed()
             logger.error(e.localizedMessage, e)
@@ -149,9 +139,7 @@ fun getMonitoringPipeline(): suspend PipelineContext<Unit, ApplicationCall>.(Uni
     }
 }
 
-fun getCallConfiguration(): CallId.Configuration.() -> Unit {
-    return {
-        generate { UUID.randomUUID().toString() }
-        header("X-Request-ID")
-    }
+fun CallId.Configuration.applyCallConfiguration() {
+    generate { UUID.randomUUID().toString() }
+    header("X-Request-ID")
 }
