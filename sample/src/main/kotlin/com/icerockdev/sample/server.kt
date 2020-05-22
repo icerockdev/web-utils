@@ -10,8 +10,8 @@ import com.icerockdev.api.Request
 import com.icerockdev.exception.ForbiddenException
 import com.icerockdev.exception.ServerErrorException
 import com.icerockdev.exception.ValidationException
-import com.icerockdev.util.QueryParser
-import com.icerockdev.util.receiveQuery
+import com.icerockdev.api.request.QueryParser
+import com.icerockdev.api.request.receiveQuery
 import com.icerockdev.webserver.*
 import com.icerockdev.webserver.log.JsonDataLogger
 import com.icerockdev.webserver.log.JsonSecret
