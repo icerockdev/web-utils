@@ -4,16 +4,19 @@
 
 package com.icerockdev.sample
 
+import com.fasterxml.jackson.databind.SerializationFeature
 import com.icerockdev.api.AbstractResponse
 import com.icerockdev.api.Request
 import com.icerockdev.exception.ForbiddenException
 import com.icerockdev.exception.ServerErrorException
 import com.icerockdev.exception.ValidationException
-import com.icerockdev.util.QueryParser
-import com.icerockdev.util.receiveQuery
+import com.icerockdev.api.request.QueryParser
+import com.icerockdev.api.request.receiveQuery
 import com.icerockdev.webserver.*
 import com.icerockdev.webserver.log.JsonDataLogger
 import com.icerockdev.webserver.log.JsonSecret
+import com.icerockdev.webserver.log.LoggingConfiguration
+import com.icerockdev.webserver.log.jsonLogger
 import com.icerockdev.webserver.tools.receiveRequest
 import io.ktor.application.Application
 import io.ktor.application.ApplicationCallPipeline
@@ -30,7 +33,10 @@ import javax.validation.constraints.Email
 
 @KtorExperimentalAPI
 fun Application.main() {
-    install(StatusPages, getStatusConfiguration())
+    install(StatusPages) {
+        applyStatusConfiguration()
+    }
+
     install(CORS) {
         applyDefaultCORS()
         anyHost() // @TODO: Don't do this in production if possible. Try to limit it.
@@ -38,16 +44,32 @@ fun Application.main() {
     install(DefaultHeaders)
     install(CallLogging) {
         applyDefaultLogging()
+        // Log only /api requests
+        // filter { call -> call.request.path().startsWith("/api") }
     }
     install(JsonDataLogger) {
-        mapperConfiguration = getObjectMapper()
+        mapperConfiguration = {
+            applyObjectMapper()
+        }
+        loggingConfiguration =
+            LoggingConfiguration(
+                responseTypes = listOf(AbstractResponse::class, CustomResponse::class),
+                requestTypes = listOf(Request::class)
+            )
     }
-    install(CallId, getCallConfiguration())
+    install(CallId) {
+        applyCallConfiguration()
+    }
     install(ContentNegotiation) {
-        jackson(block = getObjectMapper())
+        jackson() {
+            applyObjectMapper()
+            configure(SerializationFeature.INDENT_OUTPUT, false)
+        }
     }
     install(QueryParser) {
-        mapperConfiguration = getObjectMapper()
+        mapperConfiguration = {
+            applyObjectMapper()
+        }
     }
 
     /**
@@ -60,16 +82,22 @@ fun Application.main() {
             call.respond("!!!")
         }
 
-        get("/object") {
-            call.respond(TestResponse(200, "some message"))
-        }
-
-        post("/object") {
-            val request = call.receiveRequest<TestRequest>()
-            if (!request.isValidRecursive()) {
-                throw ValidationException(request.getErrorList())
+        jsonLogger {
+            get("/object") {
+                call.respond(TestResponse(200, "some message"))
             }
-            call.respond(TestResponse2(200, request.email, request.password))
+
+            post("/object") {
+                val request = call.receiveRequest<TestRequest>()
+                if (!request.isValidRecursive()) {
+                    throw ValidationException(request.getErrorList())
+                }
+                call.respond(TestResponse2(200, request.email, request.password))
+            }
+
+            get("/custom-object") {
+                call.respond(CustomResponse(200, "Custom message", listOf(1, 2, 3)))
+            }
         }
 
         get("/exception") {
@@ -101,6 +129,8 @@ class TestResponse(status: Int, message: String) :
     @JsonSecret
     val data = message
 }
+
+class CustomResponse(var status: Int, var message: String, var list: List<Int>)
 
 data class QueryValues(
     private val email: String = "",
