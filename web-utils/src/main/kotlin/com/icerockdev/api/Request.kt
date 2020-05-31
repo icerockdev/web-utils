@@ -23,7 +23,10 @@ abstract class Request(
         .buildValidatorFactory()
 ) {
     private val validator: Validator? = validatorFactory.validator
+    private var errorList: Set<ConstraintViolation<Request>> = setOf()
 
+    // TODO: Make as private
+    @Deprecated("Need use isValidRecursive() and getErrorList()", ReplaceWith("getErrorList()"))
     fun validate(): Set<ConstraintViolation<Request>> {
         if (validator == null) {
             throw ValidatorException("Validator doesn't defined")
@@ -60,13 +63,19 @@ abstract class Request(
     }
 
     @JsonIgnore
+    @Deprecated("Need use isValidRecursive() and getErrorList()", ReplaceWith("isValidRecursive()"))
     fun isValid(): Boolean {
         return validate().isEmpty()
     }
 
     @JsonIgnore
     fun isValidRecursive(): Boolean {
-        return validateRecursive().isEmpty()
+        errorList = validateRecursive()
+        return errorList.isEmpty()
+    }
+
+    fun getErrorList(): Set<ConstraintViolation<Request>> {
+        return errorList
     }
 
     @JsonIgnore

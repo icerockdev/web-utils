@@ -19,12 +19,11 @@ class ToolsTest {
     fun successValidationRulesTest() {
         val testObj = TestRequest()
         val errors = testObj.validate()
-        val errorsRecursive = testObj.validateRecursive()
 
         assertEquals(0, errors.size)
         assertTrue(testObj.isValid())
-        assertEquals(0, errorsRecursive.size)
         assertTrue(testObj.isValidRecursive())
+        assertEquals(0, testObj.getErrorList().size)
     }
 
     @Test
@@ -40,12 +39,11 @@ class ToolsTest {
         testObj.nested.list.add(NestedTestListItemRequest(10, "test10"))
 
         val errors = testObj.validate()
-        val errorsRecursive = testObj.validateRecursive()
 
         assertEquals(7, errors.size)
         assertFalse(testObj.isValid())
-        assertEquals(8, errorsRecursive.size)
         assertFalse(testObj.isValidRecursive())
+        assertEquals(8, testObj.getErrorList().size)
     }
 
     @Test
@@ -95,7 +93,8 @@ class ToolsTest {
         val testObj = TestRequest()
         testObj.age = 12
 
-        val errorsResponse = ErrorResponse(testObj.validate())
+        testObj.isValidRecursive()
+        val errorsResponse = ErrorResponse(testObj.getErrorList())
         errorsResponse.timestamp = 1566554901677
 
         val expectedErrors = arrayOf(
