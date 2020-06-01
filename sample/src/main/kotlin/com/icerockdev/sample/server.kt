@@ -29,6 +29,7 @@ import io.ktor.routing.get
 import io.ktor.routing.post
 import io.ktor.routing.routing
 import io.ktor.util.KtorExperimentalAPI
+import javax.validation.constraints.Email
 
 @KtorExperimentalAPI
 fun Application.main() {
@@ -88,8 +89,8 @@ fun Application.main() {
 
             post("/object") {
                 val request = call.receiveRequest<TestRequest>()
-                if (!request.isValid()) {
-                    throw ValidationException(request.validate())
+                if (!request.validate()) {
+                    throw ValidationException(request.getErrorList())
                 }
                 call.respond(TestResponse2(200, request.email, request.password))
             }
@@ -118,7 +119,7 @@ fun Application.main() {
     }
 }
 
-class TestRequest(val email: String, @JsonSecret val password: String) : Request()
+class TestRequest(@field:Email val email: String, @JsonSecret val password: String) : Request()
 class TestResponse2(status: Int, val email: String, @JsonSecret val password: String) :
     AbstractResponse(status, success = true) {
 }
