@@ -25,14 +25,12 @@ abstract class Request(
     private val validator: Validator? = validatorFactory.validator
     private var errorList: Set<ConstraintViolation<Request>> = setOf()
 
-    // TODO: Make as private
-    @Deprecated("Need use isValidRecursive() and getErrorList()", ReplaceWith("getErrorList()"))
     fun validate(): Set<ConstraintViolation<Request>> {
         if (validator == null) {
             throw ValidatorException("Validator doesn't defined")
         }
-
-        return validator.validate(this)
+        errorList = validator.validate(this)
+        return errorList
     }
 
     fun validateRecursive(propertyPath: String = "*"): Set<ConstraintViolation<Request>> {
@@ -59,18 +57,17 @@ abstract class Request(
             }
         }
 
-        return constraintSet
+        errorList = constraintSet
+        return errorList
     }
 
-    @JsonIgnore
-    @Deprecated("Need use isValidRecursive() and getErrorList()", ReplaceWith("isValidRecursive()"))
     fun isValid(): Boolean {
-        return validate().isEmpty()
+        return errorList.isEmpty()
     }
 
     @JsonIgnore
+    @Deprecated("Need use isValid()", ReplaceWith("isValid()"))
     fun isValidRecursive(): Boolean {
-        errorList = validateRecursive()
         return errorList.isEmpty()
     }
 

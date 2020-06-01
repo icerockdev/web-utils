@@ -89,7 +89,8 @@ fun Application.main() {
 
             post("/object") {
                 val request = call.receiveRequest<TestRequest>()
-                if (!request.isValidRecursive()) {
+                request.validate()
+                if (!request.isValid()) {
                     throw ValidationException(request.getErrorList())
                 }
                 call.respond(TestResponse2(200, request.email, request.password))
