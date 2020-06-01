@@ -25,6 +25,7 @@ abstract class Request(
     private val validator: Validator? = validatorFactory.validator
     private var errorList: Set<ConstraintViolation<Request>> = emptySet()
 
+    @JsonIgnore
     fun validate(): Boolean {
         if (validator == null) {
             throw ValidatorException("Validator doesn't defined")
@@ -33,7 +34,8 @@ abstract class Request(
         return errorList.isEmpty()
     }
 
-    fun validateRecursive(propertyPath: String = "*"): Set<ConstraintViolation<Request>> {
+    @JsonIgnore
+    fun validateRecursive(propertyPath: String = "*"): Boolean {
         validate()
         val constraintSet = getErrorList().toMutableSet()
 
@@ -46,12 +48,18 @@ abstract class Request(
             val propertyName = kProperty.name
             when (property) {
                 is Request -> {
-                    constraintSet.addAll(property.validateRecursive("$propertyPath -> $propertyName"))
+                    val isValid = property.validateRecursive("$propertyPath -> $propertyName")
+                    if (!isValid) {
+                        constraintSet.addAll(property.getErrorList())
+                    }
                 }
                 is List<*> -> {
                     property.forEach { listItem ->
                         if (listItem is Request) {
-                            constraintSet.addAll(listItem.validateRecursive("$propertyPath -> $propertyName"))
+                            val isValid = listItem.validateRecursive("$propertyPath -> $propertyName")
+                            if (!isValid) {
+                                constraintSet.addAll(listItem.getErrorList())
+                            }
                         }
                     }
                 }
@@ -59,14 +67,10 @@ abstract class Request(
         }
 
         errorList = constraintSet
-        return errorList
-    }
-
-    @JsonIgnore
-    fun isValidRecursive(): Boolean {
         return errorList.isEmpty()
     }
 
+    @JsonIgnore
     fun getErrorList(): Set<ConstraintViolation<Request>> {
         return errorList
     }

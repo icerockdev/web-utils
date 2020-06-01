@@ -35,13 +35,10 @@ class ToolsTest {
         testObj.passwordRepeat = "123457"
         testObj.nested.list.add(NestedTestListItemRequest(10, "test10"))
 
-        val errorListRecursive = testObj.validateRecursive()
-        val isValidRecursive = testObj.isValidRecursive()
-
         assertFalse(testObj.validate())
         assertEquals(7, testObj.getErrorList().size)
-        assertFalse(isValidRecursive)
-        assertEquals(8, errorListRecursive.size)
+        assertFalse(testObj.validateRecursive())
+        assertEquals(8, testObj.getErrorList().size)
     }
 
     @Test
