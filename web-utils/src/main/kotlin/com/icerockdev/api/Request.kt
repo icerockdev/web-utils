@@ -23,18 +23,19 @@ abstract class Request(
         .buildValidatorFactory()
 ) {
     private val validator: Validator? = validatorFactory.validator
-    private var errorList: Set<ConstraintViolation<Request>> = setOf()
+    private var errorList: Set<ConstraintViolation<Request>> = emptySet()
 
-    fun validate(): Set<ConstraintViolation<Request>> {
+    fun validate(): Boolean {
         if (validator == null) {
             throw ValidatorException("Validator doesn't defined")
         }
         errorList = validator.validate(this)
-        return errorList
+        return errorList.isEmpty()
     }
 
     fun validateRecursive(propertyPath: String = "*"): Set<ConstraintViolation<Request>> {
-        val constraintSet = validate().toMutableSet()
+        validate()
+        val constraintSet = getErrorList().toMutableSet()
 
         @Suppress("UNCHECKED_CAST")
         val self = this::class as KClass<Request>
@@ -61,12 +62,7 @@ abstract class Request(
         return errorList
     }
 
-    fun isValid(): Boolean {
-        return errorList.isEmpty()
-    }
-
     @JsonIgnore
-    @Deprecated("Need use isValid()", ReplaceWith("isValid()"))
     fun isValidRecursive(): Boolean {
         return errorList.isEmpty()
     }

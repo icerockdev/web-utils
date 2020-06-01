@@ -89,8 +89,7 @@ fun Application.main() {
 
             post("/object") {
                 val request = call.receiveRequest<TestRequest>()
-                request.validate()
-                if (!request.isValid()) {
+                if (!request.validate()) {
                     throw ValidationException(request.getErrorList())
                 }
                 call.respond(TestResponse2(200, request.email, request.password))
