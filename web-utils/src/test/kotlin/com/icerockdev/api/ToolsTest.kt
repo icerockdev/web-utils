@@ -30,6 +30,7 @@ class ToolsTest {
         testObj.name = null
         testObj.age = 21
         testObj.status = 10
+        testObj.mode = "ACTIVE"
         testObj.email = "test@test"
         testObj.date = "Invalid date"
         testObj.passwordRepeat = "123457"
