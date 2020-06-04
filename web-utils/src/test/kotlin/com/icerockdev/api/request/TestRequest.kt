@@ -19,6 +19,18 @@ enum class Status(val value: Int) : IAvailableIntByEnum {
     }
 }
 
+enum class Mode : IAvailableStringByEnum {
+    ACTIVE,
+    PASSIVE;
+
+    override fun getAvailableStringList(listName: String): List<String> {
+        return when (listName) {
+            "all" -> arrayListOf(ACTIVE.name, PASSIVE.name)
+            else -> emptyList()
+        }
+    }
+}
+
 @FieldMatch(message = "The password fields must match", first = "password", second = "passwordRepeat")
 class TestRequest(
     @field:NotNull(message = "Name is required")
@@ -33,6 +45,8 @@ class TestRequest(
     var age: Int = 10,
     @field:InIntListByEnum(IAvailableIntByEnum = Status::class, message = "Should it be 30 or 40")
     var status: Int = 30,
+    @field:InStringListByEnum(IAvailableStringByEnum = Mode::class, message = "Should be ACTIVE or PASSIVE")
+    var mode: String = "ACTIVE",
     @field:StrictEmail(message = "Invalid email")
     var email: String = "test@test.er",
     @field:DateFormat(message = "Date must be in YYYY-MM-DD format", pattern = "YYYY-MM-DD")

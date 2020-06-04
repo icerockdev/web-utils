@@ -48,6 +48,7 @@ class ToolsTest {
         testObj.name = null
         testObj.age = 21
         testObj.status = 10
+        testObj.mode = "ANYTHING"
         testObj.email = "test@test"
         testObj.date = "Invalid date"
         testObj.passwordRepeat = "123457"
@@ -60,6 +61,7 @@ class ToolsTest {
         val expectedErrors = arrayOf(
             ErrorDetail(message = "Should it be 10 or 20", code = 0),
             ErrorDetail(message = "Should it be 30 or 40", code = 0),
+            ErrorDetail(message = "Should be ACTIVE or PASSIVE", code = 0),
             ErrorDetail(message = "Date must be in YYYY-MM-DD format", code = 0),
             ErrorDetail(message = "Name is required", code = 0),
             ErrorDetail(message = "email определен в неверном формате", code = 0),
@@ -76,7 +78,7 @@ class ToolsTest {
             println(e.message)
         }
 
-        assertEquals(8, errorsResponse.data.size)
+        assertEquals(9, errorsResponse.data.size)
         assertEquals(422, errorsResponse.status)
         assertEquals("Validation Error", errorsResponse.message)
         assertEquals(false, errorsResponse.success)
