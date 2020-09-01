@@ -27,8 +27,8 @@ pluginManagement {
 }
 
 include(":web-utils")
-//
-val properties = startParameter.projectProperties
+
+val properties: Map<String, String> = startParameter.projectProperties
 
 // ./gradlew -PlibraryPublish publishToMavenLocal
 // ./gradlew -DBINTRAY_USER=user -DBINTRAY_KEY=key -PlibraryPublish
