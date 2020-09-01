@@ -13,7 +13,7 @@ apply(plugin = "java")
 apply(plugin = "kotlin")
 
 group = "com.icerockdev"
-version = "0.6.1"
+version = "0.7.0"
 
 val sourcesJar by tasks.registering(Jar::class) {
     classifier = "sources"
@@ -44,7 +44,7 @@ dependencies {
     api("commons-beanutils:commons-beanutils:${properties["beanutils_version"]}")
 
     // BCrypt
-    implementation(group = "org.springframework.security", name = "spring-security-core", version = properties["spring_core_version"].toString())
+    implementation("at.favre.lib:bcrypt:${properties["bcrypt_version"]}")
 
     // i18n
     implementation("org.gnu.gettext:libintl:${properties["gnu_gettext_version"]}")
@@ -55,13 +55,13 @@ dependencies {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = JavaVersion.VERSION_11.toString()
     }
 }
 

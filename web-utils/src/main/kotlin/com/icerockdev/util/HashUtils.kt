@@ -1,21 +1,25 @@
 package com.icerockdev.util
 
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import at.favre.lib.crypto.bcrypt.BCrypt
 import java.security.MessageDigest
 
+// To avoid using springframework components and keep backward compatibility
+// GENSALT_DEFAULT_LOG2_ROUNDS in org.springframework.security.crypto.bcrypt.Bcrypt
+const val BCRYPT_COST = 10
+
 object HashUtils {
-    fun sha512(input: String) = hashString("SHA-512", input)
+    fun sha512(input: String): String = hash("SHA-512", input)
 
-    fun sha256(input: String) = hashString("SHA-256", input)
+    fun sha256(input: String): String = hash("SHA-256", input)
 
-    fun sha1(input: String) = hashString("SHA-1", input)
+    fun sha1(input: String): String = hash("SHA-1", input)
 
     fun generatePasswordHash(password: String): String {
-        return BCryptPasswordEncoder().encode(password)
+        return BCrypt.withDefaults().hashToString(BCRYPT_COST, password.toCharArray());
     }
 
     fun verifyPassword(password: String, passwordHash: String): Boolean {
-        return BCryptPasswordEncoder().matches(password, passwordHash)
+        return BCrypt.verifyer().verify(password.toCharArray(), passwordHash).verified
     }
 
     fun generateRandomToken(): String {
@@ -36,9 +40,9 @@ object HashUtils {
     }
 
 
-    private fun hashString(type: String, input: String): String {
+    private fun hash(algorithm: String, input: String): String {
         return MessageDigest
-            .getInstance(type)
+            .getInstance(algorithm)
             .digest(input.toByteArray())
             .fold("", { str, it -> str + "%02x".format(it) })
     }
