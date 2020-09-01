@@ -2,7 +2,10 @@ package com.icerockdev.api.request
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.icerockdev.api.Request
+import com.icerockdev.i18n.I18N
+import com.icerockdev.i18n.I18NMessageInterpolator
 import com.icerockdev.validation.*
+import java.util.*
 import javax.validation.constraints.*
 
 enum class Status(val value: Int) : IAvailableIntByEnum {
@@ -30,6 +33,8 @@ enum class Mode : IAvailableStringByEnum {
         }
     }
 }
+
+val interpolator = I18NMessageInterpolator(I18N(locale = Locale("ru", "RU"), defaultCategory = "i18n.compile.messages"))
 
 @FieldMatch(message = "The password fields must match", first = "password", second = "passwordRepeat")
 class TestRequest(
@@ -64,7 +69,7 @@ class TestRequest(
             NestedTestListItemRequest(3, "test3")
         )
     )
-) : Request()
+) : Request(interpolator)
 
 class NestedTestRequest(
     @field:NotNull(message = "MAC is required field")
@@ -76,7 +81,7 @@ class NestedTestRequest(
     var macAddress: String,
     @field:NotNull(message = "Parameters is required field")
     var list: MutableList<NestedTestListItemRequest>
-) : Request()
+) : Request(interpolator)
 
 class NestedTestListItemRequest(
     @JsonProperty("Num")
@@ -86,4 +91,4 @@ class NestedTestListItemRequest(
     @field:Size(message = "Invalid length of Value", min = 5, max = 5)
     @field:NotNull(message = "Value is required field")
     val value: String
-) : Request()
+) : Request(interpolator)
