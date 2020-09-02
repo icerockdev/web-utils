@@ -1,7 +1,9 @@
 name: Bintray Distribution
 on:
-  release:
-    types: [published]
+  pull_request:
+    branches:
+      - master
+      - develop
 jobs:
   gradle:
     strategy:
@@ -13,5 +15,5 @@ jobs:
     - uses: actions/setup-java@v1
       with:
         java-version: 11
-    - name: Build and publish to Bintray
-      run: ./gradlew :web-utils:publish -DBINTRAY_USER=${{ secrets.BINTRAY_USER }} -DBINTRAY_KEY=${{ secrets.BINTRAY_KEY }} -PlibraryPublish
+    - name: Build and test
+      run: ./gradlew build
