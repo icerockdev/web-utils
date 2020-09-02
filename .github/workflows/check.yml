@@ -1,4 +1,4 @@
-name: Bintray Distribution
+name: Checking build and tests
 on:
   pull_request:
     branches:
