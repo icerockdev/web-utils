@@ -1,4 +1,4 @@
-name: Checking build and tests
+name: Checking build&tests
 on:
   pull_request:
     branches:
