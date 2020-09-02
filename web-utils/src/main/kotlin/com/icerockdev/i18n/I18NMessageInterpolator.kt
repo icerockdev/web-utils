@@ -5,7 +5,7 @@
 package com.icerockdev.i18n
 
 import org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator
-import java.util.*
+import java.util.Locale
 import javax.validation.MessageInterpolator
 
 class I18NMessageInterpolator(private val i18n: I18N) : ParameterMessageInterpolator() {
