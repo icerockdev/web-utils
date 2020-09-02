@@ -5,7 +5,9 @@
 package com.icerockdev.i18n
 
 import gnu.gettext.GettextResource
-import java.util.*
+import java.util.Locale
+import java.util.MissingResourceException
+import java.util.ResourceBundle
 
 
 class I18N(

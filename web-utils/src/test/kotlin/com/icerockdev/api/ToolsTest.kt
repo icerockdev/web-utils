@@ -65,8 +65,8 @@ class ToolsTest {
             ErrorDetail(message = "Should be ACTIVE or PASSIVE", code = 0),
             ErrorDetail(message = "Date must be in YYYY-MM-DD format", code = 0),
             ErrorDetail(message = "Name is required", code = 0),
-            ErrorDetail(message = "email определен в неверном формате", code = 0),
-            ErrorDetail(message = "должно быть меньше или равно 14", code = 0),
+            ErrorDetail(message = "Invalid email", code = 0),
+            ErrorDetail(message = "должно быть не больше 14", code = 0),
             ErrorDetail(message = "The password fields must match", code = 0),
             ErrorDetail(message = "Invalid length of Value", code = 0)
         ).sortedArrayWith(compareBy { it.message })

@@ -2,8 +2,22 @@ package com.icerockdev.api.request
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.icerockdev.api.Request
-import com.icerockdev.validation.*
-import javax.validation.constraints.*
+import com.icerockdev.i18n.I18N
+import com.icerockdev.i18n.I18NMessageInterpolator
+import com.icerockdev.validation.DateFormat
+import com.icerockdev.validation.FieldMatch
+import com.icerockdev.validation.IAvailableIntByEnum
+import com.icerockdev.validation.IAvailableStringByEnum
+import com.icerockdev.validation.InIntArray
+import com.icerockdev.validation.InIntListByEnum
+import com.icerockdev.validation.InStringListByEnum
+import com.icerockdev.validation.StrictEmail
+import java.util.Locale
+import javax.validation.constraints.Max
+import javax.validation.constraints.Min
+import javax.validation.constraints.NotNull
+import javax.validation.constraints.Pattern
+import javax.validation.constraints.Size
 
 enum class Status(val value: Int) : IAvailableIntByEnum {
     STATUS_ACTIVE(30),
@@ -30,6 +44,8 @@ enum class Mode : IAvailableStringByEnum {
         }
     }
 }
+
+val interpolator = I18NMessageInterpolator(I18N(locale = Locale("ru", "RU"), defaultCategory = "i18n.compile.messages"))
 
 @FieldMatch(message = "The password fields must match", first = "password", second = "passwordRepeat")
 class TestRequest(
@@ -64,7 +80,7 @@ class TestRequest(
             NestedTestListItemRequest(3, "test3")
         )
     )
-) : Request()
+) : Request(interpolator)
 
 class NestedTestRequest(
     @field:NotNull(message = "MAC is required field")
@@ -76,7 +92,7 @@ class NestedTestRequest(
     var macAddress: String,
     @field:NotNull(message = "Parameters is required field")
     var list: MutableList<NestedTestListItemRequest>
-) : Request()
+) : Request(interpolator)
 
 class NestedTestListItemRequest(
     @JsonProperty("Num")
@@ -86,4 +102,4 @@ class NestedTestListItemRequest(
     @field:Size(message = "Invalid length of Value", min = 5, max = 5)
     @field:NotNull(message = "Value is required field")
     val value: String
-) : Request()
+) : Request(interpolator)

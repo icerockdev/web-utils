@@ -6,7 +6,11 @@ package com.icerockdev.api
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.icerockdev.exception.ValidatorException
-import javax.validation.*
+import javax.validation.ConstraintViolation
+import javax.validation.MessageInterpolator
+import javax.validation.Validation
+import javax.validation.Validator
+import javax.validation.ValidatorFactory
 import kotlin.reflect.KClass
 import kotlin.reflect.full.memberProperties
 
