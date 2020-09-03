@@ -1,5 +1,4 @@
 <configuration debug="false">
-    <!--<shutdownHook/>-->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <target>System.out</target>
         <encoder>
@@ -33,12 +32,10 @@
         <timestampPattern>yyyy-MM-dd HH:mm:ss,SSS</timestampPattern>
         <maximumMessageSize>8192</maximumMessageSize>
     </appender>
-
     <root level="WARN">
         <appender-ref ref="STDERR"/>
         <appender-ref ref="gelf"/>
     </root>
-
     <logger name="com.icerockdev" level="TRACE" additivity="false">
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="STDERR"/>
