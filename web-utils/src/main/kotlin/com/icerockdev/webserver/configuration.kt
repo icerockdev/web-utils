@@ -28,6 +28,8 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.request.httpMethod
 import io.ktor.request.path
 import io.ktor.response.respond
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.slf4j.event.Level
@@ -64,7 +66,10 @@ fun StatusPages.Configuration.applyStatusConfiguration() {
         )
     }
     exception<UserException> { cause ->
-        MDC.put(Constants.LOG_FIELD_RESPONSE_BODY, mapper.writeValueAsString(cause.getErrorResponse()))
+        val json = withContext(Dispatchers.IO) {
+            mapper.writeValueAsString(cause.getErrorResponse())
+        }
+        MDC.put(Constants.LOG_FIELD_RESPONSE_BODY, json)
         call.respond(
             HttpStatusCode(cause.status, cause.message.toString()),
             cause.getErrorResponse()
@@ -76,7 +81,10 @@ fun StatusPages.Configuration.applyStatusConfiguration() {
             it.status = HttpStatusCode.InternalServerError.value
             it.message = cause.message.toString()
         }
-        MDC.put(Constants.LOG_FIELD_RESPONSE_BODY, mapper.writeValueAsString(errorResponse))
+        val json = withContext(Dispatchers.IO) {
+            mapper.writeValueAsString(errorResponse)
+        }
+        MDC.put(Constants.LOG_FIELD_RESPONSE_BODY, json)
         call.respond(
             HttpStatusCode.InternalServerError,
             errorResponse
