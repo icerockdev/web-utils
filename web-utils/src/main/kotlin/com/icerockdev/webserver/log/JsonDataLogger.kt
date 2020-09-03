@@ -37,7 +37,6 @@ import io.ktor.util.pipeline.PipelinePhase
 import org.slf4j.MDC
 import java.io.IOException
 
-
 @KtorExperimentalAPI
 class JsonDataLogger(configure: Configuration.() -> Unit) {
 
@@ -84,63 +83,58 @@ class JsonDataLogger(configure: Configuration.() -> Unit) {
         mapper.apply(configuration.mapperConfiguration)
     }
 
-    fun interceptPipeline(
-        pipeline: ApplicationCallPipeline
-    ) {
-        // response data intercept
-        pipeline.sendPipeline.insertPhaseBefore(ApplicationSendPipeline.Render, LoggingPhase)
-        pipeline.sendPipeline.intercept(LoggingPhase) { subject ->
-            configuration.loggingConfiguration.responseTypes.forEach { type ->
-                if (type.isInstance(subject)) {
-                    MDC.put(configuration.responseBodyName, mapper.writeValueAsString(subject))
-                }
-            }
+    fun interceptPipeline(pipeline: ApplicationCallPipeline) {
+        // Response status code & app env intercept
+        pipeline.insertPhaseBefore(ApplicationCallPipeline.Monitoring, MonitoringLoggingPhase)
+        pipeline.intercept(MonitoringLoggingPhase) {
+            proceed()
+            MDC.put(configuration.responseStatusCodeName, call.response.status()?.value.toString())
+            MDC.put(configuration.appEnvName, System.getProperty(configuration.systemEnvKey, Environment.LOCAL.value))
         }
 
-        // Received data intercept
-        pipeline.receivePipeline.insertPhaseBefore(ApplicationReceivePipeline.After, LoggingPhase)
-        pipeline.receivePipeline.intercept(LoggingPhase) { request ->
+        // Request data intercept
+        pipeline.receivePipeline.insertPhaseBefore(ApplicationReceivePipeline.After, RequestLoggingPhase)
+        pipeline.receivePipeline.intercept(RequestLoggingPhase) { request ->
+            proceed()
             val requestValue = request.value
             configuration.loggingConfiguration.requestTypes.forEach { type ->
-                if (type.isInstance(requestValue)) {
+                if (type.java.isAssignableFrom(subject.javaClass)) {
                     MDC.put(configuration.requestBodyName, mapper.writeValueAsString(requestValue))
                 }
             }
         }
 
-        pipeline.insertPhaseBefore(ApplicationCallPipeline.Monitoring, LoggingPhase)
-        pipeline.intercept(LoggingPhase) {
+        // Response data intercept
+        pipeline.sendPipeline.insertPhaseBefore(ApplicationSendPipeline.Render, ResponseLoggingPhase)
+        pipeline.sendPipeline.intercept(ResponseLoggingPhase) { subject ->
             proceed()
-            MDC.put(configuration.responseStatusCodeName, call.response.status()?.value.toString())
-            MDC.put(configuration.appEnvName, System.getProperty(configuration.systemEnvKey, Environment.LOCAL.value))
+            configuration.loggingConfiguration.responseTypes.forEach { type ->
+                if (type.java.isAssignableFrom(subject.javaClass)) {
+                    MDC.put(configuration.responseBodyName, mapper.writeValueAsString(subject))
+                }
+            }
         }
     }
 
     /**
      * Implementation of an [ApplicationFeature] for the [JsonDataLogger]
      */
-    companion object Feature :
-        ApplicationFeature<ApplicationCallPipeline, Configuration, JsonDataLogger> {
+    companion object Feature : ApplicationFeature<ApplicationCallPipeline, Configuration, JsonDataLogger> {
         override val key: AttributeKey<JsonDataLogger> = AttributeKey("JsonDataLogger")
 
-        val LoggingPhase = PipelinePhase("RequestLogging")
+        val RequestLoggingPhase = PipelinePhase("RequestLogging")
+        val ResponseLoggingPhase = PipelinePhase("ResponseLogging")
+        val MonitoringLoggingPhase = PipelinePhase("MonitoringLogging")
 
-        override fun install(
-            pipeline: ApplicationCallPipeline,
-            configure: Configuration.() -> Unit
-        ): JsonDataLogger {
-
+        override fun install(pipeline: ApplicationCallPipeline, configure: Configuration.() -> Unit): JsonDataLogger {
             return JsonDataLogger(configure)
         }
     }
 }
 
 @KtorExperimentalAPI
-fun Route.jsonLogger(
-    build: Route.() -> Unit
-): Route {
+fun Route.jsonLogger(build: Route.() -> Unit): Route {
     val route = createChild(JsonDataLoggerRouteSelector())
-
     application.feature(JsonDataLogger).interceptPipeline(route)
     route.build()
     return route
@@ -151,7 +145,7 @@ class JsonDataLoggerRouteSelector : RouteSelector(RouteSelectorEvaluation.qualit
         return RouteSelectorEvaluation.Constant
     }
 
-    override fun toString(): String = "(JsonDataLogger)"
+    override fun toString(): String = "(json data log)"
 }
 
 @Target(AnnotationTarget.FIELD)

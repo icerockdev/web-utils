@@ -4,14 +4,15 @@
 
 package com.icerockdev.webserver
 
+import com.fasterxml.jackson.core.util.DefaultIndenter
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.util.StdDateFormat
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.icerockdev.api.ErrorResponse
-import com.icerockdev.api.Response
-import com.icerockdev.exception.ServerErrorException
 import com.icerockdev.exception.UserException
 import io.ktor.application.Application
 import io.ktor.application.ApplicationCall
@@ -27,12 +28,20 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.request.httpMethod
 import io.ktor.request.path
 import io.ktor.response.respond
-import io.ktor.util.pipeline.PipelineContext
 import org.slf4j.LoggerFactory
+import org.slf4j.MDC
 import org.slf4j.event.Level
 import java.util.UUID
 
 fun StatusPages.Configuration.applyStatusConfiguration() {
+    val logger = LoggerFactory.getLogger(Application::class.java)
+    val mapper = jacksonObjectMapper().apply {
+        setDefaultPrettyPrinter(DefaultPrettyPrinter().apply {
+            indentArraysWith(DefaultPrettyPrinter.FixedSpaceIndenter.instance)
+            indentObjectsWith(DefaultIndenter("  ", "\n"))
+        })
+        applyObjectMapper()
+    }
     status(HttpStatusCode.NotFound) { status ->
         val error = ErrorResponse().also {
             it.status = status.value
@@ -55,20 +64,24 @@ fun StatusPages.Configuration.applyStatusConfiguration() {
         )
     }
     exception<UserException> { cause ->
+        MDC.put(Constants.LOG_FIELD_RESPONSE_BODY, mapper.writeValueAsString(cause.getErrorResponse()))
         call.respond(
             HttpStatusCode(cause.status, cause.message.toString()),
             cause.getErrorResponse()
         )
+        logger.error(cause.localizedMessage, cause)
     }
     exception<Throwable> { cause ->
-        val error = ErrorResponse().also {
+        val errorResponse = ErrorResponse().also {
             it.status = HttpStatusCode.InternalServerError.value
             it.message = cause.message.toString()
         }
+        MDC.put(Constants.LOG_FIELD_RESPONSE_BODY, mapper.writeValueAsString(errorResponse))
         call.respond(
             HttpStatusCode.InternalServerError,
-            error
+            errorResponse
         )
+        logger.error(cause.localizedMessage, cause)
     }
 }
 
@@ -112,35 +125,6 @@ fun ObjectMapper.applyObjectMapper() {
     disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
     dateFormat = StdDateFormat()
     registerKotlinModule()
-}
-
-fun getMonitoringPipeline(): suspend PipelineContext<Unit, ApplicationCall>.(Unit) -> Unit {
-    val logger = LoggerFactory.getLogger(Application::class.java)
-    return {
-        try {
-            proceed()
-        } catch (e: UserException) {
-            call.respond(
-                HttpStatusCode.fromValue(e.status),
-                e.getErrorResponse()
-            )
-            if (e is ServerErrorException) {
-                logger.error(e.localizedMessage, e)
-            }
-            proceed()
-        } catch (e: Throwable) {
-            call.respond(
-                HttpStatusCode.InternalServerError,
-                Response(
-                    status = HttpStatusCode.InternalServerError.value,
-                    message = e.message ?: "",
-                    isSuccess = false
-                )
-            )
-            proceed()
-            logger.error(e.localizedMessage, e)
-        }
-    }
 }
 
 fun CallId.Configuration.applyCallConfiguration() {

@@ -12,19 +12,18 @@ import com.icerockdev.api.request.receiveQuery
 import com.icerockdev.exception.ForbiddenException
 import com.icerockdev.exception.ServerErrorException
 import com.icerockdev.exception.ValidationException
+import com.icerockdev.validation.StrictEmail
 import com.icerockdev.webserver.applyCallConfiguration
 import com.icerockdev.webserver.applyDefaultCORS
 import com.icerockdev.webserver.applyDefaultLogging
 import com.icerockdev.webserver.applyObjectMapper
 import com.icerockdev.webserver.applyStatusConfiguration
-import com.icerockdev.webserver.getMonitoringPipeline
 import com.icerockdev.webserver.log.JsonDataLogger
 import com.icerockdev.webserver.log.JsonSecret
 import com.icerockdev.webserver.log.LoggingConfiguration
 import com.icerockdev.webserver.log.jsonLogger
 import com.icerockdev.webserver.tools.receiveRequest
 import io.ktor.application.Application
-import io.ktor.application.ApplicationCallPipeline
 import io.ktor.application.call
 import io.ktor.application.install
 import io.ktor.features.CORS
@@ -39,7 +38,6 @@ import io.ktor.routing.get
 import io.ktor.routing.post
 import io.ktor.routing.routing
 import io.ktor.util.KtorExperimentalAPI
-import javax.validation.constraints.Email
 
 @KtorExperimentalAPI
 fun Application.main() {
@@ -71,7 +69,7 @@ fun Application.main() {
         applyCallConfiguration()
     }
     install(ContentNegotiation) {
-        jackson() {
+        jackson {
             applyObjectMapper()
             configure(SerializationFeature.INDENT_OUTPUT, false)
         }
@@ -82,19 +80,14 @@ fun Application.main() {
         }
     }
 
-    /**
-     * @see <a href="https://ktor.io/advanced/pipeline.html#ktor-pipelines">Ktor Documentation</a>
-     */
-    intercept(ApplicationCallPipeline.Monitoring, getMonitoringPipeline())
-
     routing {
-        get("/") {
-            call.respond("!!!")
+        get("/object") {
+            call.respond(TestResponse(200, "some message"))
         }
 
         jsonLogger {
-            get("/object") {
-                call.respond(TestResponse(200, "some message"))
+            get("/") {
+                call.respond("!!!")
             }
 
             post("/object") {
@@ -108,31 +101,30 @@ fun Application.main() {
             get("/custom-object") {
                 call.respond(CustomResponse(200, "Custom message", listOf(1, 2, 3)))
             }
-        }
 
-        get("/exception") {
-            throw RuntimeException("Some exception")
-        }
+            get("/exception") {
+                throw RuntimeException("Some exception")
+            }
 
-        get("/handled") {
-            throw ServerErrorException("Some handled exception")
+            get("/handled") {
+                throw ServerErrorException("Some handled exception")
+            }
+
+            get("/get") {
+                val params = call.receiveQuery<QueryValues>()
+                call.respond(object : AbstractResponse(200, params.toString()) {})
+            }
         }
 
         get("/handled2") {
             throw ForbiddenException("Some handled exception")
         }
-
-        get("/get") {
-            val params = call.receiveQuery<QueryValues>()
-            call.respond(object : AbstractResponse(200, params.toString()) {})
-        }
     }
 }
 
-class TestRequest(@field:Email val email: String, @JsonSecret val password: String) : Request()
+class TestRequest(@field:StrictEmail val email: String, @JsonSecret val password: String) : Request()
 class TestResponse2(status: Int, val email: String, @JsonSecret val password: String) :
-    AbstractResponse(status, success = true) {
-}
+    AbstractResponse(status, success = true)
 
 class TestResponse(status: Int, message: String) :
     AbstractResponse(status, message, success = true) {

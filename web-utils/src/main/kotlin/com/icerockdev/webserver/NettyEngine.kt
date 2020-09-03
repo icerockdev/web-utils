@@ -13,7 +13,8 @@ import io.ktor.util.KtorExperimentalAPI
 /**
  * Netty engine
  *
- * Idea of configuration from io.ktor.server.netty.EngineMain
+ * Idea of configuration from
+ * @see io.ktor.server.netty.EngineMain
  */
 @KtorExperimentalAPI
 object NettyEngine {
@@ -40,7 +41,7 @@ object NettyEngine {
     }
 
     fun stop() {
-        this.stop(3000L, 5000L)
+        stop(3000L, 5000L)
     }
 
     fun stop(gracePeriod: Long, timeout: Long) {
