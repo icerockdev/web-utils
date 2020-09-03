@@ -7,6 +7,5 @@ package com.icerockdev.exception
 import io.ktor.http.HttpStatusCode
 
 
-class ServerErrorException(
-    message: String = "Internal Server Error"
-) : UserException(HttpStatusCode.InternalServerError.value, message)
+class ServerErrorException(message: String = HttpStatusCode.InternalServerError.description) :
+    UserException(HttpStatusCode.InternalServerError.value, message)

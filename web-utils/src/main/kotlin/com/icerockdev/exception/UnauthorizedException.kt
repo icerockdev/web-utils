@@ -6,7 +6,5 @@ package com.icerockdev.exception
 
 import io.ktor.http.HttpStatusCode
 
-
-class UnauthorizedException(
-    message: String = "Unauthorized"
-) : UserException(HttpStatusCode.Unauthorized.value, message)
+class UnauthorizedException(message: String = HttpStatusCode.Unauthorized.description) :
+    UserException(HttpStatusCode.Unauthorized.value, message)

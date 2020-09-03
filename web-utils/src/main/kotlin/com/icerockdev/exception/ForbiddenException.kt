@@ -6,8 +6,5 @@ package com.icerockdev.exception
 
 import io.ktor.http.HttpStatusCode
 
-class ForbiddenException(
-    message: String = "Forbidden"
-) : UserException(HttpStatusCode.Forbidden.value, message) {
-
-}
+class ForbiddenException(message: String = HttpStatusCode.Forbidden.description) :
+    UserException(HttpStatusCode.Forbidden.value, message)
