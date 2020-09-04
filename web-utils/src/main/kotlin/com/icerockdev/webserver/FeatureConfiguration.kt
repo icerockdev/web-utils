@@ -4,10 +4,9 @@
 
 package com.icerockdev.webserver
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.icerockdev.api.ErrorResponse
 import com.icerockdev.exception.UserException
-import io.ktor.application.Application
 import io.ktor.application.ApplicationCall
 import io.ktor.application.call
 import io.ktor.features.CORS
@@ -23,17 +22,12 @@ import io.ktor.request.path
 import io.ktor.response.respond
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.slf4j.LoggerFactory
+import org.slf4j.Logger
 import org.slf4j.MDC
 import org.slf4j.event.Level
-import java.util.UUID
+import java.util.*
 
-fun StatusPages.Configuration.applyStatusConfiguration() {
-    val logger = LoggerFactory.getLogger(Application::class.java)
-    val mapper = jacksonObjectMapper().apply {
-        applyDefaultConfiguration()
-        applyPrettyPrintConfiguration()
-    }
+fun StatusPages.Configuration.applyStatusConfiguration(logger: Logger, mapper: ObjectMapper) {
     status(HttpStatusCode.NotFound) { status ->
         val error = ErrorResponse().also {
             it.status = status.value

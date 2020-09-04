@@ -5,6 +5,7 @@
 package com.icerockdev.sample
 
 import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.icerockdev.api.AbstractResponse
 import com.icerockdev.api.Request
 import com.icerockdev.api.request.QueryParser
@@ -40,11 +41,18 @@ import io.ktor.routing.get
 import io.ktor.routing.post
 import io.ktor.routing.routing
 import io.ktor.util.KtorExperimentalAPI
+import org.slf4j.LoggerFactory
 
 @KtorExperimentalAPI
 fun Application.main() {
     install(StatusPages) {
-        applyStatusConfiguration()
+        applyStatusConfiguration(
+            logger = LoggerFactory.getLogger(Application::class.java),
+            mapper = jacksonObjectMapper().apply {
+                applyDefaultConfiguration()
+                applyPrettyPrintConfiguration()
+            }
+        )
     }
 
     install(CORS) {
