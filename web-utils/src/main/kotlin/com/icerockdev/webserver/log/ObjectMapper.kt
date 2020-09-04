@@ -1,4 +1,4 @@
-package com.icerockdev.webserver
+package com.icerockdev.webserver.log
 
 import com.fasterxml.jackson.annotation.JacksonAnnotation
 import com.fasterxml.jackson.core.JsonGenerator
