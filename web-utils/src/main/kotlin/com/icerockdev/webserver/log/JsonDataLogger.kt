@@ -4,17 +4,7 @@
 
 package com.icerockdev.webserver.log
 
-import com.fasterxml.jackson.annotation.JacksonAnnotation
-import com.fasterxml.jackson.core.JsonGenerator
-import com.fasterxml.jackson.core.util.DefaultIndenter
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializerProvider
-import com.fasterxml.jackson.databind.annotation.JacksonStdImpl
-import com.fasterxml.jackson.databind.introspect.Annotated
-import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector
-import com.fasterxml.jackson.databind.jsontype.TypeSerializer
-import com.fasterxml.jackson.databind.ser.std.StdScalarSerializer
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.icerockdev.api.AbstractResponse
 import com.icerockdev.api.Request
@@ -35,7 +25,6 @@ import io.ktor.util.AttributeKey
 import io.ktor.util.KtorExperimentalAPI
 import io.ktor.util.pipeline.PipelinePhase
 import org.slf4j.MDC
-import java.io.IOException
 
 @KtorExperimentalAPI
 class JsonDataLogger(configure: Configuration.() -> Unit) {
@@ -61,25 +50,7 @@ class JsonDataLogger(configure: Configuration.() -> Unit) {
 
     init {
         configuration = Configuration().apply(configure)
-
-        // configure mapper for hide secret values
         mapper = jacksonObjectMapper()
-        mapper.apply {
-            setDefaultPrettyPrinter(DefaultPrettyPrinter().apply {
-                indentArraysWith(DefaultPrettyPrinter.FixedSpaceIndenter.instance)
-                indentObjectsWith(DefaultIndenter("  ", "\n"))
-            })
-            // intercept custom annotation and replace value
-            setAnnotationIntrospector(object : JacksonAnnotationIntrospector() {
-                override fun findSerializer(annotated: Annotated?): Any? {
-                    val ann = annotated?.getAnnotation(JsonSecret::class.java)
-                    if (ann != null) {
-                        return SecretSerializer::class.java
-                    }
-                    return super.findSerializer(annotated)
-                }
-            })
-        }
         mapper.apply(configuration.mapperConfiguration)
     }
 
@@ -146,25 +117,4 @@ class JsonDataLoggerRouteSelector : RouteSelector(RouteSelectorEvaluation.qualit
     }
 
     override fun toString(): String = "(json data log)"
-}
-
-@Target(AnnotationTarget.FIELD)
-@JacksonAnnotation
-@Retention(AnnotationRetention.RUNTIME)
-annotation class JsonSecret()
-
-@JacksonStdImpl
-class SecretSerializer : StdScalarSerializer<Any?>(String::class.java, false) {
-
-    @Throws(IOException::class)
-    override fun serializeWithType(
-        value: Any?, gen: JsonGenerator, provider: SerializerProvider,
-        typeSer: TypeSerializer
-    ) { // no type info, just regular serialization
-        gen.writeString("****")
-    }
-
-    override fun serialize(value: Any?, gen: JsonGenerator?, provider: SerializerProvider?) {
-        gen!!.writeString("****")
-    }
 }

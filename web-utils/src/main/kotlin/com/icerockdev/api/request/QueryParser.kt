@@ -26,8 +26,7 @@ class QueryParser(val mapper: ObjectMapper) {
     /**
      * Implementation of an [ApplicationFeature] for the [QueryParser]
      */
-    companion object Feature :
-        ApplicationFeature<ApplicationCallPipeline, Configuration, QueryParser> {
+    companion object Feature : ApplicationFeature<ApplicationCallPipeline, Configuration, QueryParser> {
         override val key = queryParserAttributeKey
 
         override fun install(

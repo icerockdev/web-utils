@@ -13,13 +13,15 @@ import com.icerockdev.exception.ForbiddenException
 import com.icerockdev.exception.ServerErrorException
 import com.icerockdev.exception.ValidationException
 import com.icerockdev.validation.StrictEmail
+import com.icerockdev.webserver.JsonSecret
 import com.icerockdev.webserver.applyCallConfiguration
 import com.icerockdev.webserver.applyDefaultCORS
+import com.icerockdev.webserver.applyDefaultConfiguration
 import com.icerockdev.webserver.applyDefaultLogging
-import com.icerockdev.webserver.applyObjectMapper
+import com.icerockdev.webserver.applyJsonSecretConfiguration
+import com.icerockdev.webserver.applyPrettyPrintConfiguration
 import com.icerockdev.webserver.applyStatusConfiguration
 import com.icerockdev.webserver.log.JsonDataLogger
-import com.icerockdev.webserver.log.JsonSecret
 import com.icerockdev.webserver.log.LoggingConfiguration
 import com.icerockdev.webserver.log.jsonLogger
 import com.icerockdev.webserver.tools.receiveRequest
@@ -57,7 +59,9 @@ fun Application.main() {
     }
     install(JsonDataLogger) {
         mapperConfiguration = {
-            applyObjectMapper()
+            applyDefaultConfiguration()
+            applyPrettyPrintConfiguration()
+            applyJsonSecretConfiguration()
         }
         loggingConfiguration =
             LoggingConfiguration(
@@ -70,13 +74,13 @@ fun Application.main() {
     }
     install(ContentNegotiation) {
         jackson {
-            applyObjectMapper()
+            applyDefaultConfiguration()
             configure(SerializationFeature.INDENT_OUTPUT, false)
         }
     }
     install(QueryParser) {
         mapperConfiguration = {
-            applyObjectMapper()
+            applyDefaultConfiguration()
         }
     }
 

@@ -4,14 +4,7 @@
 
 package com.icerockdev.webserver
 
-import com.fasterxml.jackson.core.util.DefaultIndenter
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.util.StdDateFormat
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.icerockdev.api.ErrorResponse
 import com.icerockdev.exception.UserException
 import io.ktor.application.Application
@@ -38,11 +31,8 @@ import java.util.UUID
 fun StatusPages.Configuration.applyStatusConfiguration() {
     val logger = LoggerFactory.getLogger(Application::class.java)
     val mapper = jacksonObjectMapper().apply {
-        setDefaultPrettyPrinter(DefaultPrettyPrinter().apply {
-            indentArraysWith(DefaultPrettyPrinter.FixedSpaceIndenter.instance)
-            indentObjectsWith(DefaultIndenter("  ", "\n"))
-        })
-        applyObjectMapper()
+        applyDefaultConfiguration()
+        applyPrettyPrintConfiguration()
     }
     status(HttpStatusCode.NotFound) { status ->
         val error = ErrorResponse().also {
@@ -122,20 +112,11 @@ fun CallLogging.Configuration.applyDefaultLogging() {
     }
 }
 
-private fun entriesToString(entries: Set<Map.Entry<String, List<String>>>): String {
-    return entries.joinToString(separator = "\n", transform = { String.format("%s: %s", it.key, it.value.first()) })
-}
-
-
-fun ObjectMapper.applyObjectMapper() {
-    configure(SerializationFeature.INDENT_OUTPUT, true)
-    disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-    disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-    dateFormat = StdDateFormat()
-    registerKotlinModule()
-}
-
 fun CallId.Configuration.applyCallConfiguration() {
     generate { UUID.randomUUID().toString() }
     header("X-Request-ID")
+}
+
+private fun entriesToString(entries: Set<Map.Entry<String, List<String>>>): String {
+    return entries.joinToString(separator = "\n", transform = { String.format("%s: %s", it.key, it.value.first()) })
 }
