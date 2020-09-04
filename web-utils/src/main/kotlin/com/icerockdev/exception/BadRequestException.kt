@@ -5,8 +5,10 @@
 package com.icerockdev.exception
 
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
+import io.ktor.http.HttpStatusCode
 
-class BadRequestException(message: String = "Bad Request") : ExtUserException(400, message) {
+class BadRequestException(message: String = HttpStatusCode.BadRequest.description) :
+    ExtUserException(HttpStatusCode.BadRequest.value, message) {
     constructor(exception: MissingKotlinParameterException) : this() {
         val errorList = mutableListOf<ErrorDetail>()
         val fieldName = exception.path.joinToString(separator = ".") { it.fieldName ?: "[]" }

@@ -31,7 +31,6 @@ dependencies {
     implementation("biz.paluch.logging:logstash-gelf:1.13.0")
 
     implementation(project(":web-utils"))
-//    implementation("com.icerockdev:web-utils:0.0.4")
 }
 
 java {

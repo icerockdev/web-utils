@@ -5,9 +5,11 @@
 package com.icerockdev.exception
 
 import com.icerockdev.api.Request
+import io.ktor.http.HttpStatusCode
 import javax.validation.ConstraintViolation
 
-class ValidationException(message: String = "Validation Error") : ExtUserException(422, message) {
+class ValidationException(message: String = HttpStatusCode.UnprocessableEntity.description) :
+    ExtUserException(HttpStatusCode.UnprocessableEntity.value, message) {
 
     constructor(constraintViolationList: Set<ConstraintViolation<Request>>) : this() {
         val errorList = mutableListOf<ErrorDetail>()

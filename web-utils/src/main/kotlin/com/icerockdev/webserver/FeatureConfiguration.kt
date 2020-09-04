@@ -4,16 +4,9 @@
 
 package com.icerockdev.webserver
 
-import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.util.StdDateFormat
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.icerockdev.api.ErrorResponse
-import com.icerockdev.api.Response
-import com.icerockdev.exception.ServerErrorException
 import com.icerockdev.exception.UserException
-import io.ktor.application.Application
 import io.ktor.application.ApplicationCall
 import io.ktor.application.call
 import io.ktor.features.CORS
@@ -27,12 +20,14 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.request.httpMethod
 import io.ktor.request.path
 import io.ktor.response.respond
-import io.ktor.util.pipeline.PipelineContext
-import org.slf4j.LoggerFactory
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.slf4j.Logger
+import org.slf4j.MDC
 import org.slf4j.event.Level
-import java.util.UUID
+import java.util.*
 
-fun StatusPages.Configuration.applyStatusConfiguration() {
+fun StatusPages.Configuration.applyStatusConfiguration(logger: Logger, mapper: ObjectMapper) {
     status(HttpStatusCode.NotFound) { status ->
         val error = ErrorResponse().also {
             it.status = status.value
@@ -55,20 +50,30 @@ fun StatusPages.Configuration.applyStatusConfiguration() {
         )
     }
     exception<UserException> { cause ->
+        val json = withContext(Dispatchers.IO) {
+            mapper.writeValueAsString(cause.getErrorResponse())
+        }
+        MDC.put(Constants.LOG_FIELD_RESPONSE_BODY, json)
         call.respond(
             HttpStatusCode(cause.status, cause.message.toString()),
             cause.getErrorResponse()
         )
+        logger.error(cause.localizedMessage, cause)
     }
     exception<Throwable> { cause ->
-        val error = ErrorResponse().also {
+        val errorResponse = ErrorResponse().also {
             it.status = HttpStatusCode.InternalServerError.value
             it.message = cause.message.toString()
         }
+        val json = withContext(Dispatchers.IO) {
+            mapper.writeValueAsString(errorResponse)
+        }
+        MDC.put(Constants.LOG_FIELD_RESPONSE_BODY, json)
         call.respond(
             HttpStatusCode.InternalServerError,
-            error
+            errorResponse
         )
+        logger.error(cause.localizedMessage, cause)
     }
 }
 
@@ -101,49 +106,11 @@ fun CallLogging.Configuration.applyDefaultLogging() {
     }
 }
 
-private fun entriesToString(entries: Set<Map.Entry<String, List<String>>>): String {
-    return entries.joinToString(separator = "\n", transform = { String.format("%s: %s", it.key, it.value.first()) })
-}
-
-
-fun ObjectMapper.applyObjectMapper() {
-    configure(SerializationFeature.INDENT_OUTPUT, true)
-    disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-    disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-    dateFormat = StdDateFormat()
-    registerKotlinModule()
-}
-
-fun getMonitoringPipeline(): suspend PipelineContext<Unit, ApplicationCall>.(Unit) -> Unit {
-    val logger = LoggerFactory.getLogger(Application::class.java)
-    return {
-        try {
-            proceed()
-        } catch (e: UserException) {
-            call.respond(
-                HttpStatusCode.fromValue(e.status),
-                e.getErrorResponse()
-            )
-            if (e is ServerErrorException) {
-                logger.error(e.localizedMessage, e)
-            }
-            proceed()
-        } catch (e: Throwable) {
-            call.respond(
-                HttpStatusCode.InternalServerError,
-                Response(
-                    status = HttpStatusCode.InternalServerError.value,
-                    message = e.message ?: "",
-                    isSuccess = false
-                )
-            )
-            proceed()
-            logger.error(e.localizedMessage, e)
-        }
-    }
-}
-
 fun CallId.Configuration.applyCallConfiguration() {
     generate { UUID.randomUUID().toString() }
     header("X-Request-ID")
+}
+
+private fun entriesToString(entries: Set<Map.Entry<String, List<String>>>): String {
+    return entries.joinToString(separator = "\n", transform = { String.format("%s: %s", it.key, it.value.first()) })
 }

@@ -6,7 +6,5 @@ package com.icerockdev.exception
 
 import io.ktor.http.HttpStatusCode
 
-
-class NotFoundException(
-    message: String = "Not Found"
-) : UserException(HttpStatusCode.NotFound.value, message)
+class NotFoundException(message: String = HttpStatusCode.NotFound.description) :
+    UserException(HttpStatusCode.NotFound.value, message)

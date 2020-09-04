@@ -6,8 +6,7 @@ package com.icerockdev.exception
 
 import com.icerockdev.api.ErrorResponse
 
-abstract class ExtUserException(status: Int, message: String) :
-    UserException(status, message) {
+abstract class ExtUserException(status: Int, message: String) : UserException(status, message) {
     open var data: List<ErrorDetail> = mutableListOf()
 
     override fun getErrorResponse(): ErrorResponse {

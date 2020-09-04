@@ -6,11 +6,7 @@ package com.icerockdev.exception
 
 import com.icerockdev.api.ErrorResponse
 
-abstract class UserException(
-    val status: Int,
-    message: String
-) : Throwable(message) {
-
+abstract class UserException(val status: Int, message: String) : Throwable(message) {
     open fun getErrorResponse(): ErrorResponse {
         return ErrorResponse().also {
             it.status = this.status
