@@ -20,12 +20,12 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.request.httpMethod
 import io.ktor.request.path
 import io.ktor.response.respond
+import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.slf4j.Logger
 import org.slf4j.MDC
 import org.slf4j.event.Level
-import java.util.*
 
 fun StatusPages.Configuration.applyStatusConfiguration(logger: Logger, mapper: ObjectMapper) {
     status(HttpStatusCode.NotFound) { status ->
@@ -34,8 +34,8 @@ fun StatusPages.Configuration.applyStatusConfiguration(logger: Logger, mapper: O
             it.message = "Route not found"
         }
         call.respond(
-            status,
-            error
+                status,
+                error
         )
     }
     status(HttpStatusCode.Unauthorized) { status ->
@@ -45,8 +45,8 @@ fun StatusPages.Configuration.applyStatusConfiguration(logger: Logger, mapper: O
             it.success = false
         }
         call.respond(
-            status,
-            error
+                status,
+                error
         )
     }
     exception<UserException> { cause ->
@@ -55,8 +55,8 @@ fun StatusPages.Configuration.applyStatusConfiguration(logger: Logger, mapper: O
         }
         MDC.put(Constants.LOG_FIELD_RESPONSE_BODY, json)
         call.respond(
-            HttpStatusCode(cause.status, cause.message.toString()),
-            cause.getErrorResponse()
+                HttpStatusCode(cause.status, cause.message.toString()),
+                cause.getErrorResponse()
         )
         logger.error(cause.localizedMessage, cause)
     }
@@ -70,8 +70,8 @@ fun StatusPages.Configuration.applyStatusConfiguration(logger: Logger, mapper: O
         }
         MDC.put(Constants.LOG_FIELD_RESPONSE_BODY, json)
         call.respond(
-            HttpStatusCode.InternalServerError,
-            errorResponse
+                HttpStatusCode.InternalServerError,
+                errorResponse
         )
         logger.error(cause.localizedMessage, cause)
     }
