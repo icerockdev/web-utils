@@ -1,44 +1,16 @@
-package com.icerockdev.webserver.log
+package com.icerockdev.webserver
 
-import com.fasterxml.jackson.annotation.JacksonAnnotation
-import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.core.util.DefaultIndenter
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.SerializerProvider
-import com.fasterxml.jackson.databind.annotation.JacksonStdImpl
 import com.fasterxml.jackson.databind.introspect.Annotated
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector
-import com.fasterxml.jackson.databind.jsontype.TypeSerializer
-import com.fasterxml.jackson.databind.ser.std.StdScalarSerializer
 import com.fasterxml.jackson.databind.util.StdDateFormat
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import java.io.IOException
-
-
-@JacksonAnnotation
-@Target(AnnotationTarget.FIELD)
-@Retention(AnnotationRetention.RUNTIME)
-annotation class JsonSecret
-
-@JacksonStdImpl
-class SecretSerializer : StdScalarSerializer<Any?>(String::class.java, false) {
-
-    @Throws(IOException::class)
-    override fun serializeWithType(
-        value: Any?, gen: JsonGenerator, provider: SerializerProvider,
-        typeSer: TypeSerializer
-    ) { // no type info, just regular serialization
-        gen.writeString("****")
-    }
-
-    override fun serialize(value: Any?, gen: JsonGenerator?, provider: SerializerProvider?) {
-        gen!!.writeString("****")
-    }
-}
-
+import com.icerockdev.webserver.log.JsonSecret
+import com.icerockdev.webserver.log.SecretSerializer
 
 fun ObjectMapper.applyDefaultConfiguration() {
     configure(SerializationFeature.INDENT_OUTPUT, true)

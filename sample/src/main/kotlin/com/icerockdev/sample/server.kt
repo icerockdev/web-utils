@@ -21,9 +21,9 @@ import com.icerockdev.webserver.applyStatusConfiguration
 import com.icerockdev.webserver.log.JsonDataLogger
 import com.icerockdev.webserver.log.JsonSecret
 import com.icerockdev.webserver.log.LoggingConfiguration
-import com.icerockdev.webserver.log.applyDefaultConfiguration
-import com.icerockdev.webserver.log.applyJsonSecretConfiguration
-import com.icerockdev.webserver.log.applyPrettyPrintConfiguration
+import com.icerockdev.webserver.applyDefaultConfiguration
+import com.icerockdev.webserver.applyJsonSecretConfiguration
+import com.icerockdev.webserver.applyPrettyPrintConfiguration
 import com.icerockdev.webserver.log.jsonLogger
 import com.icerockdev.webserver.tools.receiveRequest
 import io.ktor.application.Application
