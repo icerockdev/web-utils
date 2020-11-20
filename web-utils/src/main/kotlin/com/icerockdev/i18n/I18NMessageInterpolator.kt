@@ -18,6 +18,6 @@ class I18NMessageInterpolator(private val i18n: I18N) : ParameterMessageInterpol
     }
 
     private fun interpolateMessage(message: String? , context: MessageInterpolator.Context?, locale: Locale?): String {
-       return i18n.t(super.interpolate(message, context, locale), "", locale)
+       return i18n.t(super.interpolate(message, context, locale), null, locale)
     }
 }
