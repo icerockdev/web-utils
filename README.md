@@ -12,7 +12,7 @@ repositories {
 }
 
 // Append dependency
-implementation("com.icerockdev:web-utils:0.7.1")
+implementation("com.icerockdev:web-utils:0.7.2")
 ````
 
 ## Library usage
