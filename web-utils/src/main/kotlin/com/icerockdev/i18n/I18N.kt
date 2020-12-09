@@ -5,9 +5,7 @@
 package com.icerockdev.i18n
 
 import gnu.gettext.GettextResource
-import java.util.Locale
-import java.util.MissingResourceException
-import java.util.ResourceBundle
+import java.util.*
 
 
 class I18N(
@@ -30,7 +28,11 @@ class I18N(
      */
     private fun gettext(text: String, category: String? = null, currentLocale: Locale? = null): String {
         return try {
-            val resource = ResourceBundle.getBundle(category ?: defaultCategory, currentLocale ?: locale)
+            val resource = ResourceBundle.getBundle(
+                category ?: defaultCategory,
+                currentLocale ?: locale,
+                ResourceBundle.Control.getNoFallbackControl(ResourceBundle.Control.FORMAT_DEFAULT)
+            )
             GettextResource.gettext(resource, text)
         } catch (exception: MissingResourceException) {
             text
