@@ -13,10 +13,5 @@ jobs:
       - uses: actions/setup-java@v1
         with:
           java-version: 11
-      - name: Prepare to publish
-        run: |
-          echo '${{secrets.GPG_KEY_CONTENTS}}' | base64 -d > publish_key.gpg
-          gpg --quiet --batch --yes --decrypt --passphrase="${{secrets.SECRET_PASSPHRASE}}" \
-          --output secret.gpg publish_key.gpg
       - name: Build and publish to mavenCentral
-        run: ./gradlew :web-utils:publish -DOSSRH_USER=${{ secrets.OSSRH_USER }} -DOSSRH_KEY=${{ secrets.OSSRH_KEY }} -PlibraryPublish -Psigning.secretKeyRingFile=secret.gpg -Psigning.keyId=${{secrets.SIGNING_KEYID}} -Psigning.password=${{secrets.SIGNING_PASSWORD}}
+        run: ./gradlew :web-utils:publish -DOSSRH_USER=${{ secrets.OSSRH_USER }} -DOSSRH_KEY=${{ secrets.OSSRH_KEY }} -PlibraryPublish -PsigningKey=${{secrets.GPG_KEY_CONTENTS}} -PsigningKeyId=${{secrets.SIGNING_KEYID}} -PsigningPassword=${{secrets.SIGNING_PASSWORD}}

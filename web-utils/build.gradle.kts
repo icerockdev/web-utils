@@ -22,8 +22,6 @@ val sourcesJar by tasks.registering(Jar::class) {
 }
 
 dependencies {
-    // kotlin
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${properties["kotlin_version"]}")
     // logging
     implementation("ch.qos.logback:logback-classic:${properties["logback_version"]}")
     // ktor
@@ -82,36 +80,51 @@ publishing {
     }
     publications {
         register("mavenJava", MavenPublication::class) {
-            val projectName = project.name
             from(components["java"])
             artifact(sourcesJar.get())
             pom {
-                name.set(projectName.replace("-", " ").capitalize())
-                description.set(name)
-                url.set("https://github.com/icerockdev/$projectName")
+                name.set("Web utils")
+                description.set("Ktor based web-server with validation and internationalization")
+                url.set("https://github.com/icerockdev/web-utils")
                 licenses {
                     license {
-                        url.set("https://github.com/icerockdev/$projectName/blob/master/LICENSE.md")
+                        url.set("https://github.com/icerockdev/web-utils/blob/master/LICENSE.md")
                     }
                 }
 
                 developers {
                     developer {
-                        id.set("icerockdev")
-                        name.set("IceRock Development")
-                        email.set("maven@icerock.dev")
+                        id.set("YokiToki")
+                        name.set("Stanislav")
+                        email.set("skarakovski@icerockdev.com")
+                    }
+
+                    developer {
+                        id.set("AlexeiiShvedov")
+                        name.set("Alex Shvedov")
+                        email.set("ashvedov@icerockdev.com")
+                    }
+
+                    developer {
+                        id.set("oyakovlev")
+                        name.set("Oleg Yakovlev")
+                        email.set("oyakovlev@icerockdev.com")
                     }
                 }
 
                 scm {
-                    connection.set("scm:git:ssh://github.com/icerockdev/$projectName.git")
-                    developerConnection.set("scm:git:ssh://github.com/icerockdev/$projectName.git")
-                    url.set("https://github.com/icerockdev/$projectName")
+                    connection.set("scm:git:ssh://github.com/icerockdev/web-utils.git")
+                    developerConnection.set("scm:git:ssh://github.com/icerockdev/web-utils.git")
+                    url.set("https://github.com/icerockdev/web-utils")
                 }
             }
         }
 
         signing {
+            val signingKeyId: String? by project
+            val signingKey: String? by project
+            val signingPassword: String? by project
+            useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
             sign(publishing.publications["mavenJava"])
         }
     }
