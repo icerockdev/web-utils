@@ -7,16 +7,17 @@ plugins {
     id("kotlin-kapt")
     id("maven-publish")
     id("java-library")
+    id("signing")
 }
 
 apply(plugin = "java")
 apply(plugin = "kotlin")
 
 group = "com.icerockdev"
-version = "0.8.0"
+version = "0.8.1"
 
 val sourcesJar by tasks.registering(Jar::class) {
-    classifier = "sources"
+    archiveClassifier.set("sources")
     from(sourceSets.main.get().allSource)
 }
 
@@ -57,6 +58,7 @@ dependencies {
 java {
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
+    withJavadocJar()
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
@@ -70,18 +72,47 @@ repositories {
 }
 
 publishing {
-    repositories.maven("https://api.bintray.com/maven/icerockdev/backend/web-utils/;publish=1") {
-        name = "bintray"
+    repositories.maven("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/") {
+        name = "OSSRH"
 
         credentials {
-            username = System.getProperty("BINTRAY_USER")
-            password = System.getProperty("BINTRAY_KEY")
+            username = System.getProperty("OSSRH_USER")
+            password = System.getProperty("OSSRH_KEY")
         }
     }
     publications {
         register("mavenJava", MavenPublication::class) {
+            val projectName = project.name
             from(components["java"])
             artifact(sourcesJar.get())
+            pom {
+                name.set(projectName.replace("-", " ").capitalize())
+                description.set(name)
+                url.set("https://github.com/icerockdev/$projectName")
+                licenses {
+                    license {
+                        url.set("https://github.com/icerockdev/$projectName/blob/master/LICENSE.md")
+                    }
+                }
+
+                developers {
+                    developer {
+                        id.set("icerockdev")
+                        name.set("IceRock Development")
+                        email.set("maven@icerock.dev")
+                    }
+                }
+
+                scm {
+                    connection.set("scm:git:ssh://github.com/icerockdev/$projectName.git")
+                    developerConnection.set("scm:git:ssh://github.com/icerockdev/$projectName.git")
+                    url.set("https://github.com/icerockdev/$projectName")
+                }
+            }
+        }
+
+        signing {
+            sign(publishing.publications["mavenJava"])
         }
     }
 }
