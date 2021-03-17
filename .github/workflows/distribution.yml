@@ -14,4 +14,10 @@ jobs:
         with:
           java-version: 11
       - name: Build and publish to mavenCentral
-        run: ./gradlew :web-utils:publish -DOSSRH_USER=${{ secrets.OSSRH_USER }} -DOSSRH_KEY=${{ secrets.OSSRH_KEY }} -PlibraryPublish -PsigningKey=${{secrets.GPG_KEY_CONTENTS}} -PsigningKeyId=${{secrets.SIGNING_KEYID}} -PsigningPassword=${{secrets.SIGNING_PASSWORD}}
+        env:
+          OSSRH_USER: ${{ secrets.OSSRH_USER }}
+          OSSRH_KEY: ${{ secrets.OSSRH_KEY }}
+          SIGNING_KEY_ID: ${{secrets.SIGNING_KEYID}}
+          SIGNING_PASSWORD: ${{secrets.SIGNING_PASSWORD}}
+          SIGNING_KEY: ${{secrets.GPG_KEY_CONTENTS}}
+        run: ./gradlew :web-utils:publish -PlibraryPublish

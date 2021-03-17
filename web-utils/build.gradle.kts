@@ -121,9 +121,9 @@ publishing {
         }
 
         signing {
-            val signingKeyId: String? by project
-            val signingKey: String? by project
-            val signingPassword: String? by project
+            val signingKeyId: String? = System.getProperty("SIGNING_KEY_ID")
+            val signingKey: String? = System.getProperty("SIGNING_KEY")
+            val signingPassword: String? = System.getProperty("SIGNING_PASSWORD")
             useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
             sign(publishing.publications["mavenJava"])
         }
