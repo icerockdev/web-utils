@@ -1,4 +1,4 @@
-name: Bintray Distribution
+name: Maven Central Distribution
 on:
   release:
     types: [published]
@@ -9,9 +9,9 @@ jobs:
         os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-java@v1
-      with:
-        java-version: 11
-    - name: Build and publish to Bintray
-      run: ./gradlew :web-utils:publish -DBINTRAY_USER=${{ secrets.BINTRAY_USER }} -DBINTRAY_KEY=${{ secrets.BINTRAY_KEY }} -PlibraryPublish
+      - uses: actions/checkout@v2
+      - uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - name: Build and publish to mavenCentral
+        run: ./gradlew :web-utils:publish -DOSSRH_USER=${{ secrets.OSSRH_USER }} -DOSSRH_KEY=${{ secrets.OSSRH_KEY }} -PlibraryPublish -PsigningKey=${{secrets.GPG_KEY_CONTENTS}} -PsigningKeyId=${{secrets.SIGNING_KEYID}} -PsigningPassword=${{secrets.SIGNING_PASSWORD}}

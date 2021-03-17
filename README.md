@@ -8,11 +8,11 @@
 ````kotlin
 // Append repository
 repositories {
-    maven { url = url("https://dl.bintray.com/icerockdev/backend") }
+    mavenCentral()
 }
 
 // Append dependency
-implementation("com.icerockdev:web-utils:0.8.0")
+implementation("com.icerockdev:web-utils:0.8.1")
 ````
 
 ## Library usage

@@ -23,7 +23,7 @@ repositories {
 }
 
 application {
-    mainClassName = "com.icerockdev.sample.Main"
+    mainClass.set("com.icerockdev.sample.Main")
 }
 
 dependencies {
@@ -45,10 +45,11 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
 }
 
 val jar by tasks.getting(Jar::class) {
-    archiveName = "sample.jar"
-    destinationDir = file("${project.rootDir}/build")
+    archiveFileName.set("sample.jar")
+    destinationDirectory.set(file("${project.rootDir}/build"))
     manifest {
-        attributes["Main-Class"] = application.mainClassName
-        attributes["Class-Path"] = configurations.runtimeClasspath.get().filter { it.name.endsWith("jar") }.joinToString { "libs/${it.name}" }
+        attributes["Main-Class"] = application.mainClass.get()
+        attributes["Class-Path"] =
+            configurations.runtimeClasspath.get().filter { it.name.endsWith("jar") }.joinToString { "libs/${it.name}" }
     }
 }

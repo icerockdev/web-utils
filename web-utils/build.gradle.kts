@@ -7,22 +7,21 @@ plugins {
     id("kotlin-kapt")
     id("maven-publish")
     id("java-library")
+    id("signing")
 }
 
 apply(plugin = "java")
 apply(plugin = "kotlin")
 
 group = "com.icerockdev"
-version = "0.8.0"
+version = "0.8.1"
 
 val sourcesJar by tasks.registering(Jar::class) {
-    classifier = "sources"
+    archiveClassifier.set("sources")
     from(sourceSets.main.get().allSource)
 }
 
 dependencies {
-    // kotlin
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${properties["kotlin_version"]}")
     // logging
     implementation("ch.qos.logback:logback-classic:${properties["logback_version"]}")
     // ktor
@@ -57,6 +56,7 @@ dependencies {
 java {
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
+    withJavadocJar()
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
@@ -70,18 +70,62 @@ repositories {
 }
 
 publishing {
-    repositories.maven("https://api.bintray.com/maven/icerockdev/backend/web-utils/;publish=1") {
-        name = "bintray"
+    repositories.maven("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/") {
+        name = "OSSRH"
 
         credentials {
-            username = System.getProperty("BINTRAY_USER")
-            password = System.getProperty("BINTRAY_KEY")
+            username = System.getProperty("OSSRH_USER")
+            password = System.getProperty("OSSRH_KEY")
         }
     }
     publications {
         register("mavenJava", MavenPublication::class) {
             from(components["java"])
             artifact(sourcesJar.get())
+            pom {
+                name.set("Web utils")
+                description.set("Ktor based web-server with validation and internationalization")
+                url.set("https://github.com/icerockdev/web-utils")
+                licenses {
+                    license {
+                        url.set("https://github.com/icerockdev/web-utils/blob/master/LICENSE.md")
+                    }
+                }
+
+                developers {
+                    developer {
+                        id.set("YokiToki")
+                        name.set("Stanislav")
+                        email.set("skarakovski@icerockdev.com")
+                    }
+
+                    developer {
+                        id.set("AlexeiiShvedov")
+                        name.set("Alex Shvedov")
+                        email.set("ashvedov@icerockdev.com")
+                    }
+
+                    developer {
+                        id.set("oyakovlev")
+                        name.set("Oleg Yakovlev")
+                        email.set("oyakovlev@icerockdev.com")
+                    }
+                }
+
+                scm {
+                    connection.set("scm:git:ssh://github.com/icerockdev/web-utils.git")
+                    developerConnection.set("scm:git:ssh://github.com/icerockdev/web-utils.git")
+                    url.set("https://github.com/icerockdev/web-utils")
+                }
+            }
+        }
+
+        signing {
+            val signingKeyId: String? by project
+            val signingKey: String? by project
+            val signingPassword: String? by project
+            useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
+            sign(publishing.publications["mavenJava"])
         }
     }
 }
