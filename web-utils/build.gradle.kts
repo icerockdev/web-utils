@@ -74,8 +74,8 @@ publishing {
         name = "OSSRH"
 
         credentials {
-            username = System.getProperty("OSSRH_USER")
-            password = System.getProperty("OSSRH_KEY")
+            username = System.getenv("OSSRH_USER")
+            password = System.getenv("OSSRH_KEY")
         }
     }
     publications {
@@ -121,9 +121,9 @@ publishing {
         }
 
         signing {
-            val signingKeyId: String? = System.getProperty("SIGNING_KEY_ID")
-            val signingKey: String? = System.getProperty("SIGNING_KEY")
-            val signingPassword: String? = System.getProperty("SIGNING_PASSWORD")
+            val signingKeyId: String? = System.getenv("SIGNING_KEY_ID")
+            val signingKey: String? = System.getenv("SIGNING_KEY")
+            val signingPassword: String? = System.getenv("SIGNING_PASSWORD")
             useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
             sign(publishing.publications["mavenJava"])
         }
