@@ -1,12 +1,12 @@
 name: Maven Central Distribution
 on:
   release:
-    types: [published]
+    types: [ published ]
 jobs:
   gradle:
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [ ubuntu-latest ]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
@@ -19,5 +19,6 @@ jobs:
           OSSRH_KEY: ${{ secrets.OSSRH_KEY }}
           SIGNING_KEY_ID: ${{secrets.SIGNING_KEYID}}
           SIGNING_PASSWORD: ${{secrets.SIGNING_PASSWORD}}
-          SIGNING_KEY: ${{secrets.GPG_KEY_CONTENTS}}
+          SIGNING_KEY: |
+            ${{secrets.GPG_KEY_CONTENTS}}
         run: ./gradlew :web-utils:publish -PlibraryPublish
