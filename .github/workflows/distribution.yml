@@ -17,8 +17,7 @@ jobs:
         env:
           OSSRH_USER: ${{ secrets.OSSRH_USER }}
           OSSRH_KEY: ${{ secrets.OSSRH_KEY }}
-          SIGNING_KEY_ID: ${{secrets.SIGNING_KEYID}}
-          SIGNING_PASSWORD: ${{secrets.SIGNING_PASSWORD}}
-          SIGNING_KEY: |
-            ${{secrets.GPG_KEY_CONTENTS}}
+          SIGNING_KEY_ID: ${{ secrets.SIGNING_KEYID }}
+          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
+          SIGNING_KEY: ${{ secrets.GPG_KEY_CONTENTS }}
         run: ./gradlew :web-utils:publish -PlibraryPublish
