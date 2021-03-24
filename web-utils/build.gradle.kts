@@ -1,4 +1,5 @@
 import java.util.Base64
+import kotlin.text.String
 
 /*
  * Copyright 2020 IceRock MAG Inc. Use of this source code is governed by the Apache 2.0 license.
@@ -126,7 +127,7 @@ publishing {
             val signingKeyId: String? = System.getenv("SIGNING_KEY_ID")
             val signingPassword: String? = System.getenv("SIGNING_PASSWORD")
             val signingKey: String? = System.getenv("SIGNING_KEY")?.let { base64Key ->
-                Base64.getMimeDecoder().decode(base64Key).map{ it.toChar()}.joinToString("")
+                String(Base64.getDecoder().decode(base64Key))
             }
             useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
             sign(publishing.publications["mavenJava"])
