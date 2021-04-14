@@ -17,7 +17,7 @@ apply(plugin = "java")
 apply(plugin = "kotlin")
 
 group = "com.icerockdev"
-version = "0.8.1"
+version = "0.9.0"
 
 val sourcesJar by tasks.registering(Jar::class) {
     archiveClassifier.set("sources")
@@ -35,7 +35,6 @@ dependencies {
 
     // json
     api("io.ktor:ktor-jackson:${properties["ktor_version"]}")
-    api("io.ktor:ktor-client-jackson:${properties["ktor_version"]}")
 
     // javax
     api("javax.validation:validation-api:${properties["javax_validation"]}")

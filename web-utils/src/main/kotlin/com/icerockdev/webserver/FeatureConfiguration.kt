@@ -4,16 +4,17 @@
 
 package com.icerockdev.webserver
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.icerockdev.api.ErrorResponse
 import com.icerockdev.exception.UserException
+import com.icerockdev.webserver.log.ApplicationCallLogging
+import com.icerockdev.webserver.log.JsonDataLogger
+import com.icerockdev.webserver.log.callIdMdc
 import io.ktor.application.ApplicationCall
 import io.ktor.application.call
+import io.ktor.application.featureOrNull
 import io.ktor.features.CORS
 import io.ktor.features.CallId
-import io.ktor.features.CallLogging
 import io.ktor.features.StatusPages
-import io.ktor.features.callIdMdc
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
@@ -21,22 +22,16 @@ import io.ktor.request.httpMethod
 import io.ktor.request.path
 import io.ktor.response.respond
 import java.util.UUID
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.slf4j.Logger
-import org.slf4j.MDC
 import org.slf4j.event.Level
 
-fun StatusPages.Configuration.applyStatusConfiguration(logger: Logger, mapper: ObjectMapper) {
+fun StatusPages.Configuration.applyDefaultStatusConfiguration(logger: Logger) {
     status(HttpStatusCode.NotFound) { status ->
         val error = ErrorResponse().also {
             it.status = status.value
             it.message = "Route not found"
         }
-        call.respond(
-                status,
-                error
-        )
+        call.respond(status, error)
     }
     status(HttpStatusCode.Unauthorized) { status ->
         val error = ErrorResponse().also {
@@ -44,20 +39,12 @@ fun StatusPages.Configuration.applyStatusConfiguration(logger: Logger, mapper: O
             it.message = "Unauthorized"
             it.success = false
         }
-        call.respond(
-                status,
-                error
-        )
+        call.respond(status, error)
     }
     exception<UserException> { cause ->
-        val json = withContext(Dispatchers.IO) {
-            mapper.writeValueAsString(cause.getErrorResponse())
-        }
-        MDC.put(Constants.LOG_FIELD_RESPONSE_BODY, json)
-        call.respond(
-                HttpStatusCode(cause.status, cause.message.toString()),
-                cause.getErrorResponse()
-        )
+        val response = cause.getErrorResponse()
+        call.application.featureOrNull(JsonDataLogger)?.setResponseBody(call, response)
+        call.respond(HttpStatusCode(cause.status, cause.message.toString()), response)
         logger.error(cause.localizedMessage, cause)
     }
     exception<Throwable> { cause ->
@@ -65,14 +52,9 @@ fun StatusPages.Configuration.applyStatusConfiguration(logger: Logger, mapper: O
             it.status = HttpStatusCode.InternalServerError.value
             it.message = cause.message.toString()
         }
-        val json = withContext(Dispatchers.IO) {
-            mapper.writeValueAsString(errorResponse)
-        }
-        MDC.put(Constants.LOG_FIELD_RESPONSE_BODY, json)
-        call.respond(
-                HttpStatusCode.InternalServerError,
-                errorResponse
-        )
+
+        call.application.featureOrNull(JsonDataLogger)?.setResponseBody(call, errorResponse)
+        call.respond(HttpStatusCode.InternalServerError, errorResponse)
         logger.error(cause.localizedMessage, cause)
     }
 }
@@ -89,9 +71,12 @@ fun CORS.Configuration.applyDefaultCORS() {
     allowNonSimpleContentTypes = true
 }
 
-fun CallLogging.Configuration.applyDefaultLogging() {
+fun ApplicationCallLogging.Configuration.applyDefaultLogging() {
     level = Level.TRACE
     callIdMdc(Constants.LOG_FIELD_TRACE_UUID)
+    mdc(Constants.LOG_FIELD_ENV) {
+        System.getProperty("env", Environment.LOCAL.value)
+    }
     mdc(Constants.LOG_FIELD_HEADERS) { call: ApplicationCall ->
         entriesToString(call.request.headers.entries())
     }
@@ -104,6 +89,19 @@ fun CallLogging.Configuration.applyDefaultLogging() {
     mdc(Constants.LOG_FIELD_REQUEST_PATH) { call: ApplicationCall ->
         call.request.path()
     }
+    mdc(Constants.LOG_FIELD_STATUS_CODE) { call: ApplicationCall ->
+        call.response.status()?.value.toString()
+    }
+    mdc(Constants.LOG_FIELD_REQUEST_BODY) { call: ApplicationCall ->
+        call.application.featureOrNull(JsonDataLogger)?.let {
+            call.attributes.getOrNull(key = it.loggerDataKey)?.requestBody
+        }
+    }
+    mdc(Constants.LOG_FIELD_RESPONSE_BODY) { call: ApplicationCall ->
+        call.application.featureOrNull(JsonDataLogger)?.let {
+            call.attributes.getOrNull(key = it.loggerDataKey)?.responseBody
+        }
+    }
 }
 
 fun CallId.Configuration.applyCallConfiguration() {
@@ -111,6 +109,10 @@ fun CallId.Configuration.applyCallConfiguration() {
     header("X-Request-ID")
 }
 
-private fun entriesToString(entries: Set<Map.Entry<String, List<String>>>): String {
-    return entries.joinToString(separator = "\n", transform = { String.format("%s: %s", it.key, it.value.first()) })
+fun entriesToString(entries: Set<Map.Entry<String, List<String>>>): String {
+    return entries.joinToString(separator = "\n") { entry ->
+        entry.value.joinToString(separator = "\n") {
+            String.format("%s: %s", entry.key, it)
+        }
+    }
 }
