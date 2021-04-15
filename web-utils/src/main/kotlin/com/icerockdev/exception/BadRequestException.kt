@@ -10,10 +10,8 @@ import io.ktor.http.HttpStatusCode
 class BadRequestException(message: String = HttpStatusCode.BadRequest.description) :
     ExtUserException(HttpStatusCode.BadRequest.value, message) {
     constructor(exception: MissingKotlinParameterException) : this() {
-        val errorList = mutableListOf<ErrorDetail>()
         val fieldName = exception.path.joinToString(separator = ".") { it.fieldName ?: "[]" }
-        errorList.add(ErrorDetail(message = "Property $fieldName are required"))
-        setErrors(errorList)
+        setErrors(listOf(ErrorDetail(message = "Property $fieldName are required", field = fieldName)))
     }
 
     constructor(errorList: List<ErrorDetail>) : this() {

@@ -8,6 +8,7 @@ import com.icerockdev.api.ErrorResponse
 import com.icerockdev.exception.UserException
 import com.icerockdev.webserver.log.ApplicationCallLogging
 import com.icerockdev.webserver.log.JsonDataLogger
+import com.icerockdev.webserver.log.LoggingHelper
 import com.icerockdev.webserver.log.callIdMdc
 import io.ktor.application.ApplicationCall
 import io.ktor.application.call
@@ -71,17 +72,21 @@ fun CORS.Configuration.applyDefaultCORS() {
     allowNonSimpleContentTypes = true
 }
 
-fun ApplicationCallLogging.Configuration.applyDefaultLogging() {
+fun ApplicationCallLogging.Configuration.applyDefaultLogging(secretFieldList: List<String> = getDefaultSecretFieldList()) {
     level = Level.TRACE
     callIdMdc(Constants.LOG_FIELD_TRACE_UUID)
     mdc(Constants.LOG_FIELD_ENV) {
         System.getProperty("env", Environment.LOCAL.value)
     }
     mdc(Constants.LOG_FIELD_HEADERS) { call: ApplicationCall ->
-        entriesToString(call.request.headers.entries())
+        LoggingHelper.entriesToJsonString(call.request.headers.entries())?.let {
+            LoggingHelper.replaceSecretFieldsValueInJsonString(it, secretFieldList)
+        }
     }
     mdc(Constants.LOG_FIELD_QUERY_PARAMETERS) { call: ApplicationCall ->
-        entriesToString(call.request.queryParameters.entries())
+        LoggingHelper.entriesToJsonString(call.request.queryParameters.entries())?.let {
+            LoggingHelper.replaceSecretFieldsValueInJsonString(it, secretFieldList)
+        }
     }
     mdc(Constants.LOG_FIELD_HTTP_METHOD) { call: ApplicationCall ->
         call.request.httpMethod.value
@@ -94,7 +99,9 @@ fun ApplicationCallLogging.Configuration.applyDefaultLogging() {
     }
     mdc(Constants.LOG_FIELD_REQUEST_BODY) { call: ApplicationCall ->
         call.application.featureOrNull(JsonDataLogger)?.let {
-            call.attributes.getOrNull(key = it.loggerDataKey)?.requestBody
+            call.attributes.getOrNull(key = it.loggerDataKey)?.requestBody?.let { requestBody ->
+                LoggingHelper.replaceSecretFieldsValueInJsonString(requestBody, secretFieldList)
+            }
         }
     }
     mdc(Constants.LOG_FIELD_RESPONSE_BODY) { call: ApplicationCall ->
@@ -104,15 +111,12 @@ fun ApplicationCallLogging.Configuration.applyDefaultLogging() {
     }
 }
 
+internal fun getDefaultSecretFieldList(): List<String> {
+    return listOf("password", "token", "authorization")
+}
+
+
 fun CallId.Configuration.applyCallConfiguration() {
     generate { UUID.randomUUID().toString() }
     header("X-Request-ID")
-}
-
-fun entriesToString(entries: Set<Map.Entry<String, List<String>>>): String {
-    return entries.joinToString(separator = "\n") { entry ->
-        entry.value.joinToString(separator = "\n") {
-            String.format("%s: %s", entry.key, it)
-        }
-    }
 }
