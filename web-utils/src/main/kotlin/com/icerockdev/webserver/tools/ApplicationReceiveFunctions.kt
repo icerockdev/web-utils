@@ -15,6 +15,7 @@ suspend inline fun <reified T : Any> ApplicationCall.receiveRequest(): T {
     } catch (e: MissingKotlinParameterException) {
         throw BadRequestException(e)
     } catch (e: Throwable) {
+        application.environment.log.error(e.localizedMessage, e)
         throw BadRequestException(message = "Invalid request body")
     }
 }

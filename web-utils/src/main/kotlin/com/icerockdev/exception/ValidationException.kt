@@ -14,7 +14,12 @@ class ValidationException(message: String = HttpStatusCode.UnprocessableEntity.d
     constructor(constraintViolationList: Set<ConstraintViolation<Request>>) : this() {
         val errorList = mutableListOf<ErrorDetail>()
         for (constraintViolation in constraintViolationList) {
-            errorList.add(ErrorDetail(message = constraintViolation.message))
+            errorList.add(
+                ErrorDetail(
+                    message = constraintViolation.message,
+                    field = constraintViolation.propertyPath?.lastOrNull()?.name
+                )
+            )
         }
         setErrors(errorList)
     }

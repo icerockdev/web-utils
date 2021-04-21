@@ -6,5 +6,6 @@ package com.icerockdev.exception
 
 data class ErrorDetail(
     val message: String,
-    val code: Int = 0
+    val code: Int = 0,
+    val field: String? = null,
 )
