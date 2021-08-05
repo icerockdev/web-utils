@@ -30,22 +30,22 @@ Content-Type: application/json
 
 ###
 
-GET http://127.0.0.1:8080/custom-object
+GET http://127.0.0.1:8080/custom-object?userId=123456
 Accept: application/json
 
 ###
 
-GET http://127.0.0.1:8080/exception
+GET http://127.0.0.1:8080/exception?userId=123456
 Accept: application/json
 
 ###
 
-GET http://127.0.0.1:8080/handled
+GET http://127.0.0.1:8080/handled?userId=123456
 Accept: application/json
 
 ###
 
-GET http://127.0.0.1:8080/handled2
+GET http://127.0.0.1:8080/handled2?userId=123456
 Accept: application/json
 
 ###

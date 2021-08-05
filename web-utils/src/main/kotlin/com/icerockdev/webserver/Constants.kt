@@ -15,6 +15,7 @@ object Constants {
     const val LOG_FIELD_TRACE_UUID: String = "traceUUID"
     const val LOG_FIELD_STATUS_CODE: String = "statusCode"
     const val LOG_FIELD_ENV: String = "env"
+    const val LOG_FIELD_USER_ID: String = "userId"
 }
 
 enum class Environment(val value: String) {
