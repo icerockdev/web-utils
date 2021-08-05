@@ -72,7 +72,10 @@ fun CORS.Configuration.applyDefaultCORS() {
     allowNonSimpleContentTypes = true
 }
 
-fun ApplicationCallLogging.Configuration.applyDefaultLogging(secretFieldList: List<String> = getDefaultSecretFieldList()) {
+fun ApplicationCallLogging.Configuration.applyDefaultLogging(
+    secretFieldList: List<String> = getDefaultSecretFieldList(),
+    userExtractor: (ApplicationCall) -> String? = { null }
+) {
     level = Level.TRACE
     callIdMdc(Constants.LOG_FIELD_TRACE_UUID)
     mdc(Constants.LOG_FIELD_ENV) {
@@ -108,6 +111,9 @@ fun ApplicationCallLogging.Configuration.applyDefaultLogging(secretFieldList: Li
         call.application.featureOrNull(JsonDataLogger)?.let {
             call.attributes.getOrNull(key = it.loggerDataKey)?.responseBody
         }
+    }
+    mdc(Constants.LOG_FIELD_USER_ID) { call: ApplicationCall ->
+        userExtractor(call)
     }
 }
 

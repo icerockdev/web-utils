@@ -27,6 +27,7 @@ import com.icerockdev.webserver.log.LoggingConfiguration
 import com.icerockdev.webserver.log.jsonLogger
 import com.icerockdev.webserver.tools.receiveRequest
 import io.ktor.application.Application
+import io.ktor.application.ApplicationCall
 import io.ktor.application.call
 import io.ktor.application.install
 import io.ktor.features.CORS
@@ -57,7 +58,9 @@ fun Application.main() {
     }
     install(DefaultHeaders)
     install(ApplicationCallLogging) {
-        applyDefaultLogging()
+        applyDefaultLogging { call: ApplicationCall ->
+            call.parameters["userId"]
+        }
         // Log only /api requests
         // filter { call -> call.request.path().startsWith("/api") }
     }
