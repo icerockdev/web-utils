@@ -18,16 +18,11 @@ version = "0.0.1"
 
 apply(plugin = "kotlin")
 
-repositories {
-    maven { setUrl("https://dl.bintray.com/icerockdev/backend") }
-}
-
 application {
     mainClass.set("com.icerockdev.sample.Main")
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${properties["kotlin_version"]}")
     implementation("biz.paluch.logging:logstash-gelf:1.13.0")
 
     implementation(project(":web-utils"))
