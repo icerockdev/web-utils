@@ -26,6 +26,9 @@ dependencies {
     implementation("biz.paluch.logging:logstash-gelf:1.13.0")
 
     implementation(project(":web-utils"))
+
+    // tests
+    testImplementation("io.ktor:ktor-server-tests:${properties["ktor_version"]}")
 }
 
 java {

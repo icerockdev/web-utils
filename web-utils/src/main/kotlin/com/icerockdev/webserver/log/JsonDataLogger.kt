@@ -122,7 +122,7 @@ fun Route.jsonLogger(build: Route.() -> Unit): Route {
     return route
 }
 
-class JsonDataLoggerRouteSelector : RouteSelector(RouteSelectorEvaluation.qualityConstant) {
+class JsonDataLoggerRouteSelector : RouteSelector() {
     override fun evaluate(context: RoutingResolveContext, segmentIndex: Int): RouteSelectorEvaluation {
         return RouteSelectorEvaluation.Constant
     }

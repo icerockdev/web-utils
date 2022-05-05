@@ -41,10 +41,8 @@ import io.ktor.routing.get
 import io.ktor.routing.post
 import io.ktor.routing.put
 import io.ktor.routing.routing
-import io.ktor.util.KtorExperimentalAPI
 import org.slf4j.LoggerFactory
 
-@KtorExperimentalAPI
 fun Application.main() {
     install(StatusPages) {
         applyDefaultStatusConfiguration(
@@ -54,7 +52,6 @@ fun Application.main() {
 
     install(CORS) {
         applyDefaultCORS()
-        anyHost() // @TODO: Don't do this in production if possible. Try to limit it.
     }
     install(DefaultHeaders)
     install(ApplicationCallLogging) {
@@ -88,6 +85,7 @@ fun Application.main() {
         mapperConfiguration = {
             applyDefaultConfiguration()
         }
+        errorLogging = true
     }
 
     routing {

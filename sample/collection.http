@@ -54,3 +54,8 @@ GET http://127.0.0.1:8080/get?age=10&TestValue=20&email=a@a.com&test=10&test=20&
 Accept: application/json
 
 ###
+
+GET http://127.0.0.1:8080/get?age=10&testValue=20&email=a@a.com&test=10&tmp=1
+Accept: application/json
+
+###
