@@ -12,15 +12,17 @@ import io.ktor.application.ApplicationCall
 import io.ktor.application.ApplicationCallPipeline
 import io.ktor.application.ApplicationFeature
 import io.ktor.application.call
+import io.ktor.application.log
 import io.ktor.util.AttributeKey
 import io.ktor.util.pipeline.PipelinePhase
 
-class QueryParser(val mapper: ObjectMapper) {
+class QueryParser(val mapper: ObjectMapper, val errorLogging: Boolean) {
     /**
      * Configuration type for [QueryParser] feature
      */
     class Configuration {
         var mapperConfiguration: ObjectMapper.() -> Unit = {}
+        var errorLogging = false
     }
 
     /**
@@ -38,7 +40,7 @@ class QueryParser(val mapper: ObjectMapper) {
             // configure mapper for hide secret values
             val mapper = jacksonObjectMapper()
             mapper.apply(configuration.mapperConfiguration)
-            val queryParser = QueryParser(mapper)
+            val queryParser = QueryParser(mapper = mapper, errorLogging = configuration.errorLogging)
 
             val queryParserPhase = PipelinePhase("QueryParser")
             // put to attributes link to configuration (intercept body execution)
@@ -76,7 +78,7 @@ inline fun <reified T> ApplicationCall.receiveQueryOrNull(): T? {
      * As result we have age and Age are identical
      */
     val mappingValues = parameters.entries().associateByTo(LinkedHashMap(), { it.key }, {
-        if (it.value.isEmpty())  {
+        if (it.value.isEmpty()) {
             return@associateByTo null
         }
         if (it.value.size == 1) {
@@ -86,7 +88,11 @@ inline fun <reified T> ApplicationCall.receiveQueryOrNull(): T? {
     })
     return try {
         parser.mapper.convertValue(mappingValues, jacksonTypeRef<T>()) as T
-    } catch (e : IllegalArgumentException) {
+    } catch (e: IllegalArgumentException) {
+        if (parser.errorLogging) {
+            application.log.error(e.localizedMessage, e)
+        }
+
         null
     }
 }

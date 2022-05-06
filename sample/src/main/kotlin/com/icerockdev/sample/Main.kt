@@ -5,11 +5,9 @@
 package com.icerockdev.sample
 
 import com.icerockdev.webserver.NettyEngine
-import io.ktor.util.KtorExperimentalAPI
 
 object Main {
 
-    @KtorExperimentalAPI
     @JvmStatic
     fun main(args: Array<String>) {
         NettyEngine.start(args)

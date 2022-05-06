@@ -7,7 +7,7 @@ fun Parameters.parseFilters(): HashMap<String, String> {
     val filters: HashMap<String, String> = hashMapOf()
     parameters.entries().forEach {
         if (it.key.contains("filters.")) {
-            val key = it.key.substringAfter(".").toUpperCase()
+            val key = it.key.substringAfter(".").uppercase()
             val value = parameters[it.key]
 
             if (value != null) {

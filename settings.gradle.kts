@@ -10,7 +10,6 @@ pluginManagement {
             url = uri("https://maven-central.storage-download.googleapis.com/repos/central/data/")
         }
         maven { url = uri ("https://plugins.gradle.org/m2/") }
-        maven { url = uri ("https://dl.bintray.com/kotlin/kotlin") }
     }
 
     resolutionStrategy {
@@ -30,7 +29,7 @@ include(":web-utils")
 val properties: Map<String, String> = startParameter.projectProperties
 
 // ./gradlew -PlibraryPublish publishToMavenLocal
-// ./gradlew -DBINTRAY_USER=user -DBINTRAY_KEY=key -PlibraryPublish
+// ./gradlew :web-utils:publish -PlibraryPublish
 val libraryPublish: Boolean = properties.containsKey("libraryPublish")
 if(!libraryPublish) {
     include(":sample")

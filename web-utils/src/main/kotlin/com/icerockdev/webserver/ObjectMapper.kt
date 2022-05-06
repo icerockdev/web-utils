@@ -16,6 +16,7 @@ fun ObjectMapper.applyDefaultConfiguration() {
     configure(SerializationFeature.INDENT_OUTPUT, true)
     disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
     disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+    enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
     dateFormat = StdDateFormat()
     registerKotlinModule()
 }
