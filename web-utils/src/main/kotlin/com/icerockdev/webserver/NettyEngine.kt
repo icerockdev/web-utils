@@ -4,7 +4,7 @@
 
 package com.icerockdev.webserver
 
-import io.ktor.config.ApplicationConfig
+import io.ktor.server.config.ApplicationConfig
 import io.ktor.server.engine.commandLineEnvironment
 import io.ktor.server.engine.loadCommonConfiguration
 import io.ktor.server.netty.NettyApplicationEngine
@@ -18,12 +18,14 @@ import io.netty.handler.codec.http.HttpServerCodec
  * @see io.ktor.server.netty.EngineMain
  */
 object NettyEngine {
+    private const val DEFAULT_STOP_GRACE_PERIOD = 3000L
+    private const val DEFAULT_STOP_TIMEOUT = 5000L
     private lateinit var engine: NettyApplicationEngine
 
     fun start(args: Array<String>) {
         val applicationEnvironment = commandLineEnvironment(args)
         engine = NettyApplicationEngine(applicationEnvironment) { loadConfiguration(applicationEnvironment.config) }
-        engine.start(wait = false)
+        engine.start(wait = true)
     }
 
     private fun NettyApplicationEngine.Configuration.loadConfiguration(config: ApplicationConfig) {
@@ -65,7 +67,7 @@ object NettyEngine {
     }
 
     fun stop() {
-        stop(3000L, 5000L)
+        stop(DEFAULT_STOP_GRACE_PERIOD, DEFAULT_STOP_TIMEOUT)
     }
 
     fun stop(gracePeriod: Long, timeout: Long) {

@@ -17,7 +17,7 @@ apply(plugin = "java")
 apply(plugin = "kotlin")
 
 group = "com.icerockdev"
-version = "0.10.1"
+version = "1.0.0"
 
 val sourcesJar by tasks.registering(Jar::class) {
     archiveClassifier.set("sources")
@@ -29,17 +29,27 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:${properties["logback_version"]}")
     // ktor
     api("io.ktor:ktor-server-core:${properties["ktor_version"]}")
+    api("io.ktor:ktor-server-cors:${properties["ktor_version"]}")
+    api("io.ktor:ktor-server-call-logging:${properties["ktor_version"]}")
+    api("io.ktor:ktor-server-status-pages:${properties["ktor_version"]}")
+    api("io.ktor:ktor-server-call-id:${properties["ktor_version"]}")
+    api("io.ktor:ktor-server-content-negotiation:${properties["ktor_version"]}")
+    api("io.ktor:ktor-server-default-headers-jvm:${properties["ktor_version"]}")
     implementation("io.ktor:ktor-server-netty:${properties["ktor_version"]}")
 
     api("joda-time:joda-time:${properties["jodatime_version"]}")
 
     // json
-    api("io.ktor:ktor-jackson:${properties["ktor_version"]}")
+    api("io.ktor:ktor-serialization-jackson:${properties["ktor_version"]}")
 
     // javax
     api("javax.validation:validation-api:${properties["javax_validation"]}")
     api("org.hibernate.validator:hibernate-validator:${properties["hibernate_validator_version"]}")
-    api("org.hibernate.validator:hibernate-validator-annotation-processor:${properties["hibernate_validator_annotation_processor_version"]}")
+    api(
+        group = "org.hibernate.validator",
+        name = "hibernate-validator-annotation-processor",
+        version = properties["hibernate_validator_annotation_processor_version"].toString()
+    )
     api("javax.el:javax.el-api:${properties["javax_el_api_version"]}")
     api("org.glassfish.web:javax.el:${properties["javax_el_version"]}")
     api("commons-beanutils:commons-beanutils:${properties["beanutils_version"]}")
@@ -123,6 +133,7 @@ publishing {
         }
 
         signing {
+            setRequired({!properties.containsKey("libraryPublishToMavenLocal")})
             val signingKeyId: String? = System.getenv("SIGNING_KEY_ID")
             val signingPassword: String? = System.getenv("SIGNING_PASSWORD")
             val signingKey: String? = System.getenv("SIGNING_KEY")?.let { base64Key ->

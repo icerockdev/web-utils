@@ -14,7 +14,7 @@ plugins {
 }
 
 group = "com.icerockdev"
-version = "0.0.1"
+version = "1.0.0"
 
 apply(plugin = "kotlin")
 
@@ -23,12 +23,14 @@ application {
 }
 
 dependencies {
-    implementation("biz.paluch.logging:logstash-gelf:1.13.0")
+    implementation("biz.paluch.logging:logstash-gelf:1.15.0")
 
     implementation(project(":web-utils"))
+    implementation("io.ktor:ktor-serialization-jackson:${properties["ktor_version"]}")
 
     // tests
     testImplementation("io.ktor:ktor-server-tests:${properties["ktor_version"]}")
+    testImplementation("io.ktor:ktor-client-content-negotiation:${properties["ktor_version"]}")
 }
 
 java {
@@ -47,7 +49,8 @@ val jar by tasks.getting(Jar::class) {
     destinationDirectory.set(file("${project.rootDir}/build"))
     manifest {
         attributes["Main-Class"] = application.mainClass.get()
-        attributes["Class-Path"] =
-            configurations.runtimeClasspath.get().filter { it.name.endsWith("jar") }.joinToString { "libs/${it.name}" }
+        attributes["Class-Path"] = configurations.runtimeClasspath.get().filter {
+            it.name.endsWith("jar")
+        }.joinToString { "libs/${it.name}" }
     }
 }

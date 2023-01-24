@@ -1,23 +1,22 @@
 package com.icerockdev.webserver.log
 
-import io.ktor.application.Application
-import io.ktor.application.ApplicationCall
-import io.ktor.application.ApplicationCallPipeline
-import io.ktor.application.ApplicationEnvironment
-import io.ktor.application.ApplicationEvents
-import io.ktor.application.ApplicationFeature
-import io.ktor.application.ApplicationStarted
-import io.ktor.application.ApplicationStarting
-import io.ktor.application.ApplicationStopped
-import io.ktor.application.ApplicationStopping
-import io.ktor.application.call
-import io.ktor.application.log
-import io.ktor.features.callId
+import io.ktor.events.Events
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
-import io.ktor.request.ApplicationRequest
-import io.ktor.request.httpMethod
-import io.ktor.request.path
+import io.ktor.server.application.Application
+import io.ktor.server.application.ApplicationCall
+import io.ktor.server.application.ApplicationCallPipeline
+import io.ktor.server.application.ApplicationStarted
+import io.ktor.server.application.ApplicationStarting
+import io.ktor.server.application.ApplicationStopped
+import io.ktor.server.application.ApplicationStopping
+import io.ktor.server.application.BaseApplicationPlugin
+import io.ktor.server.application.call
+import io.ktor.server.application.log
+import io.ktor.server.plugins.callid.callId
+import io.ktor.server.request.ApplicationRequest
+import io.ktor.server.request.httpMethod
+import io.ktor.server.request.path
 import io.ktor.util.AttributeKey
 import io.ktor.util.pipeline.PipelinePhase
 import org.slf4j.Logger
@@ -29,7 +28,7 @@ import org.slf4j.event.Level
  */
 class ApplicationCallLogging private constructor(
     private val log: Logger,
-    private val monitor: ApplicationEvents,
+    private val monitor: Events,
     private val level: Level,
     private val filters: List<(ApplicationCall) -> Boolean>,
     private val mdcEntries: List<MDCEntry>,
@@ -52,7 +51,7 @@ class ApplicationCallLogging private constructor(
         var level: Level = Level.TRACE
 
         /**
-         * Customize [Logger], will default to [ApplicationEnvironment.log]
+         * Customize [Logger], will default to [Application.log]
          */
         var logger: Logger? = null
 
@@ -115,9 +114,9 @@ class ApplicationCallLogging private constructor(
     }
 
     /**
-     * Installable feature for [ApplicationCallLogging].
+     * Implementation of an [BaseApplicationPlugin] for the [ApplicationCallLogging].
      */
-    companion object Feature : ApplicationFeature<Application, Configuration, ApplicationCallLogging> {
+    companion object Plugin : BaseApplicationPlugin<Application, Configuration, ApplicationCallLogging> {
         override val key: AttributeKey<ApplicationCallLogging> = AttributeKey("ApplicationCallLogging")
         override fun install(pipeline: Application, configure: Configuration.() -> Unit): ApplicationCallLogging {
             val loggingPhase = PipelinePhase("ApplicationCallLoggingPhase")
@@ -131,7 +130,7 @@ class ApplicationCallLogging private constructor(
                 configuration.formatCall
             )
 
-            pipeline.insertPhaseBefore(ApplicationCallPipeline.Monitoring, loggingPhase)
+            pipeline.insertPhaseBefore(ApplicationCallPipeline.Fallback, loggingPhase)
 
             if (feature.mdcEntries.isNotEmpty()) {
                 pipeline.intercept(loggingPhase) {

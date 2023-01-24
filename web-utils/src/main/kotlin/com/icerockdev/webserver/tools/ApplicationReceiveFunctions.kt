@@ -6,8 +6,8 @@ package com.icerockdev.webserver.tools
 
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import com.icerockdev.exception.BadRequestException
-import io.ktor.application.ApplicationCall
-import io.ktor.request.receive
+import io.ktor.server.application.ApplicationCall
+import io.ktor.server.request.receive
 import kotlin.reflect.KClass
 
 suspend inline fun <reified T : Any> ApplicationCall.receiveRequest(): T = receiveRequest(T::class)

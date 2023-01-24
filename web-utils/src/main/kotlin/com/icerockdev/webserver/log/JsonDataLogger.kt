@@ -7,25 +7,23 @@ package com.icerockdev.webserver.log
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.icerockdev.api.AbstractResponse
-import io.ktor.application.ApplicationCall
-import io.ktor.application.ApplicationCallPipeline
-import io.ktor.application.ApplicationFeature
-import io.ktor.application.call
-import io.ktor.application.feature
 import io.ktor.http.content.MultiPartData
-import io.ktor.request.ApplicationReceivePipeline
-import io.ktor.request.ApplicationReceiveRequest
-import io.ktor.response.ApplicationSendPipeline
-import io.ktor.routing.Route
-import io.ktor.routing.RouteSelector
-import io.ktor.routing.RouteSelectorEvaluation
-import io.ktor.routing.RoutingResolveContext
-import io.ktor.routing.application
+import io.ktor.server.application.ApplicationCall
+import io.ktor.server.application.ApplicationCallPipeline
+import io.ktor.server.application.BaseApplicationPlugin
+import io.ktor.server.application.call
+import io.ktor.server.application.plugin
+import io.ktor.server.request.ApplicationReceivePipeline
+import io.ktor.server.response.ApplicationSendPipeline
+import io.ktor.server.routing.Route
+import io.ktor.server.routing.RouteSelector
+import io.ktor.server.routing.RouteSelectorEvaluation
+import io.ktor.server.routing.RoutingResolveContext
+import io.ktor.server.routing.application
 import io.ktor.util.AttributeKey
 import io.ktor.util.pipeline.PipelinePhase
 import io.ktor.util.toByteArray
 import io.ktor.utils.io.ByteReadChannel
-import kotlin.reflect.jvm.jvmErasure
 
 class JsonDataLogger(configure: Configuration.() -> Unit) {
 
@@ -59,22 +57,21 @@ class JsonDataLogger(configure: Configuration.() -> Unit) {
         pipeline.receivePipeline.insertPhaseBefore(ApplicationReceivePipeline.Before, RequestLoggingPhase)
         // Raw request data intercept
         pipeline.receivePipeline.intercept(RequestLoggingPhase) { request ->
-            if (request.typeInfo.jvmErasure.java == MultiPartData::class.java) {
+            if (request::class.java == MultiPartData::class.java) {
                 return@intercept
             }
 
-            val byteArray = when (val requestValue = request.value) {
-                is ByteReadChannel -> requestValue.toByteArray()
+            val byteArray = when (request) {
+                is ByteReadChannel -> request.toByteArray()
                 else -> null
             }
 
             setLoggerData(call, getLoggerData(call).copy(requestBody = byteArray?.let { String(it) }))
-            val incomingContent = byteArray?.let { ByteReadChannel(it) } ?: request.value
-            proceedWith(ApplicationReceiveRequest(request.typeInfo, incomingContent, reusableValue = true))
+            proceedWith(byteArray?.let { ByteReadChannel(it) } ?: request)
         }
 
         // Response data intercept
-        pipeline.sendPipeline.insertPhaseBefore(ApplicationSendPipeline.Render, ResponseLoggingPhase)
+        pipeline.sendPipeline.insertPhaseBefore(ApplicationSendPipeline.Transform, ResponseLoggingPhase)
         pipeline.sendPipeline.intercept(ResponseLoggingPhase) { subject ->
             proceed()
             if (configuration.isAcceptResponse(subject)) {
@@ -96,9 +93,9 @@ class JsonDataLogger(configure: Configuration.() -> Unit) {
     }
 
     /**
-     * Implementation of an [ApplicationFeature] for the [JsonDataLogger]
+     * Implementation of an [BaseApplicationPlugin] for the [JsonDataLogger]
      */
-    companion object Feature : ApplicationFeature<ApplicationCallPipeline, Configuration, JsonDataLogger> {
+    companion object Plugin : BaseApplicationPlugin<ApplicationCallPipeline, Configuration, JsonDataLogger> {
         override val key: AttributeKey<JsonDataLogger> = AttributeKey("JsonDataLogger")
 
         val RequestLoggingPhase = PipelinePhase("RequestLogging")
@@ -117,7 +114,7 @@ class JsonDataLogger(configure: Configuration.() -> Unit) {
 
 fun Route.jsonLogger(build: Route.() -> Unit): Route {
     val route = createChild(JsonDataLoggerRouteSelector())
-    application.feature(JsonDataLogger).interceptPipeline(route)
+    application.plugin(JsonDataLogger).interceptPipeline(route)
     route.build()
     return route
 }

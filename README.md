@@ -12,7 +12,7 @@ repositories {
 }
 
 // Append dependency
-implementation("com.icerockdev:web-utils:0.10.1")
+implementation("com.icerockdev:web-utils:1.0.0")
 ````
 
 ## Library usage
@@ -23,7 +23,8 @@ Lib include tools for:
  - Localization support tools
  - Validation support tools
  - Query params parser to Object (include ktor feature with required fields) 
- - JsonDataLogger - log request and response data via MDC, working by CallLogging
+ - ApplicationCallLogging - a plugin that allows you to log incoming client requests and server responses
+ - JsonDataLogger - log request and response data via MDC, working by ApplicationCallLogging
 
 ## TODO
  - Support multiple connectors from HOCON file
