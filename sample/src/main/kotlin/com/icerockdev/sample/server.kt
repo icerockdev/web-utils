@@ -126,7 +126,7 @@ private fun Routing.setupSampleRouting() {
         }
 
         get("/exception") {
-            throw RuntimeException("Some exception")
+            throw UnsupportedOperationException("Some exception")
         }
 
         get("/handled") {
