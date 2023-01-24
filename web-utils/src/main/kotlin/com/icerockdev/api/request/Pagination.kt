@@ -4,7 +4,7 @@
 
 package com.icerockdev.api.request
 
-import io.ktor.application.ApplicationCall
+import io.ktor.server.application.ApplicationCall
 
 class Pagination(
     val limit: Int = 10,

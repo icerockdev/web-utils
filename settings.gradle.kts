@@ -28,7 +28,7 @@ include(":web-utils")
 
 val properties: Map<String, String> = startParameter.projectProperties
 
-// ./gradlew -PlibraryPublish publishToMavenLocal
+// ./gradlew -PlibraryPublish -PlibraryPublishToMavenLocal publishToMavenLocal
 // ./gradlew :web-utils:publish -PlibraryPublish
 val libraryPublish: Boolean = properties.containsKey("libraryPublish")
 if(!libraryPublish) {

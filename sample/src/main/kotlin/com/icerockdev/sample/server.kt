@@ -26,21 +26,23 @@ import com.icerockdev.webserver.log.JsonSecret
 import com.icerockdev.webserver.log.LoggingConfiguration
 import com.icerockdev.webserver.log.jsonLogger
 import com.icerockdev.webserver.tools.receiveRequest
-import io.ktor.application.Application
-import io.ktor.application.ApplicationCall
-import io.ktor.application.call
-import io.ktor.application.install
-import io.ktor.features.CORS
-import io.ktor.features.CallId
-import io.ktor.features.ContentNegotiation
-import io.ktor.features.DefaultHeaders
-import io.ktor.features.StatusPages
-import io.ktor.jackson.jackson
-import io.ktor.response.respond
-import io.ktor.routing.get
-import io.ktor.routing.post
-import io.ktor.routing.put
-import io.ktor.routing.routing
+import io.ktor.http.HttpStatusCode
+import io.ktor.serialization.jackson.jackson
+import io.ktor.server.application.Application
+import io.ktor.server.application.ApplicationCall
+import io.ktor.server.application.call
+import io.ktor.server.application.install
+import io.ktor.server.plugins.callid.CallId
+import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.plugins.cors.routing.CORS
+import io.ktor.server.plugins.defaultheaders.DefaultHeaders
+import io.ktor.server.plugins.statuspages.StatusPages
+import io.ktor.server.response.respond
+import io.ktor.server.routing.Routing
+import io.ktor.server.routing.get
+import io.ktor.server.routing.post
+import io.ktor.server.routing.put
+import io.ktor.server.routing.routing
 import org.slf4j.LoggerFactory
 
 fun Application.main() {
@@ -89,52 +91,56 @@ fun Application.main() {
     }
 
     routing {
-        get("/object") {
-            call.respond(TestResponse(200, "some message"))
+        setupSampleRouting()
+    }
+}
+
+private fun Routing.setupSampleRouting() {
+    get("/object") {
+        call.respond(TestResponse(HttpStatusCode.OK.value, "some message without JsonLogger plugin"))
+    }
+
+    jsonLogger {
+        get("/") {
+            call.respond("!!!")
         }
 
-        jsonLogger {
-            get("/") {
-                call.respond("!!!")
+        post("/object") {
+            val request = call.receiveRequest<TestRequest>()
+            if (!request.validate()) {
+                throw ValidationException(request.getErrorList())
             }
-
-            post("/object") {
-                val request = call.receiveRequest<TestRequest>()
-                if (!request.validate()) {
-                    throw ValidationException(request.getErrorList())
-                }
-                call.respond(TestResponse2(200, request.email, request.password))
-            }
-
-            put("/object") {
-                val request = call.receiveRequest<TestRequest>()
-                if (!request.validate()) {
-                    throw ValidationException(request.getErrorList())
-                }
-                call.respond(TestResponse2(200, request.email, request.password))
-            }
-
-            get("/custom-object") {
-                call.respond(CustomResponse(200, "Custom message", listOf(1, 2, 3)))
-            }
-
-            get("/exception") {
-                throw RuntimeException("Some exception")
-            }
-
-            get("/handled") {
-                throw ServerErrorException("Some handled exception")
-            }
-
-            get("/get") {
-                val params = call.receiveQuery<QueryValues>()
-                call.respond(object : AbstractResponse(200, params.toString()) {})
-            }
+            call.respond(TestResponse2(HttpStatusCode.OK.value, request.email, request.password))
         }
 
-        get("/handled2") {
-            throw ForbiddenException("Some handled exception")
+        put("/object") {
+            val request = call.receiveRequest<TestRequest>()
+            if (!request.validate()) {
+                throw ValidationException(request.getErrorList())
+            }
+            call.respond(TestResponse2(HttpStatusCode.OK.value, request.email, request.password))
         }
+
+        get("/custom-object") {
+            call.respond(CustomResponse(HttpStatusCode.OK.value, "Custom message", listOf(1, 2, 3)))
+        }
+
+        get("/exception") {
+            throw RuntimeException("Some exception")
+        }
+
+        get("/handled") {
+            throw ServerErrorException("Some handled exception")
+        }
+
+        get("/get") {
+            val params = call.receiveQuery<QueryValues>()
+            call.respond(object : AbstractResponse(HttpStatusCode.OK.value, params.toString()) {})
+        }
+    }
+
+    get("/handled2") {
+        throw ForbiddenException("Some handled exception")
     }
 }
 

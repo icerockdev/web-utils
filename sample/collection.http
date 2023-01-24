@@ -3,6 +3,11 @@ Accept: text/plain
 
 ###
 
+GET http://127.0.0.1:8080/not-found
+Accept: text/plain
+
+###
+
 GET http://127.0.0.1:8080/object
 Accept: application/json
 

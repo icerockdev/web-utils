@@ -8,11 +8,11 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonTypeRef
 import com.icerockdev.exception.BadRequestException
-import io.ktor.application.ApplicationCall
-import io.ktor.application.ApplicationCallPipeline
-import io.ktor.application.ApplicationFeature
-import io.ktor.application.call
-import io.ktor.application.log
+import io.ktor.server.application.ApplicationCall
+import io.ktor.server.application.ApplicationCallPipeline
+import io.ktor.server.application.BaseApplicationPlugin
+import io.ktor.server.application.call
+import io.ktor.server.application.log
 import io.ktor.util.AttributeKey
 import io.ktor.util.pipeline.PipelinePhase
 
@@ -26,9 +26,9 @@ class QueryParser(val mapper: ObjectMapper, val errorLogging: Boolean) {
     }
 
     /**
-     * Implementation of an [ApplicationFeature] for the [QueryParser]
+     * Implementation of an [BaseApplicationPlugin] for the [QueryParser]
      */
-    companion object Feature : ApplicationFeature<ApplicationCallPipeline, Configuration, QueryParser> {
+    companion object Plugin : BaseApplicationPlugin<ApplicationCallPipeline, Configuration, QueryParser> {
         override val key = queryParserAttributeKey
 
         override fun install(

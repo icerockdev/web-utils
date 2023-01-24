@@ -1,14 +1,19 @@
+import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.jacksonTypeRef
 import com.icerockdev.sample.CustomResponse
 import com.icerockdev.sample.QueryValues
 import com.icerockdev.sample.TestResponse
-import com.icerockdev.sample.main
+import com.icerockdev.webserver.applyDefaultConfiguration
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.request.get
+import io.ktor.client.request.header
 import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.testing.handleRequest
-import io.ktor.server.testing.withTestApplication
+import io.ktor.serialization.jackson.jackson
+import io.ktor.server.testing.ApplicationTestBuilder
+import io.ktor.server.testing.testApplication
 import org.junit.Assert
 import org.junit.Test
 
@@ -24,31 +29,41 @@ class SampleTest {
             test = listOf("string"),
             tmp = listOf(1, 2, 3)
         )
-        withTestApplication(moduleFunction = { main() }) {
-            handleRequest(HttpMethod.Get, "/get?age=5&testValue=1&email=test@test.e&test=string&tmp=1&tmp=2&tmp=3") {
-                addHeader(HttpHeaders.Accept, "application/json")
-                addHeader(HttpHeaders.ContentType, "application/json")
-            }.apply {
-                Assert.assertEquals(HttpStatusCode.OK.value, response.status()?.value)
-                val result = mapper.readValue(response.content, jacksonTypeRef<TestResponse>())
-                Assert.assertNotNull(result)
-                Assert.assertEquals(query.toString(), result?.message)
+        testApplication {
+            val response = getClient().get("/get?age=5&testValue=1&email=test@test.e&test=string&tmp=1&tmp=2&tmp=3") {
+                header(HttpHeaders.Accept, "application/json")
+                header(HttpHeaders.ContentType, "application/json")
             }
+            Assert.assertEquals(HttpStatusCode.OK.value, response.status.value)
+            val result: TestResponse? = response.body()
+            Assert.assertNotNull(result)
+            Assert.assertEquals(query.toString(), result?.message)
+
         }
     }
 
     @Test
     fun `test custom object`() {
         val customResponse = CustomResponse(200, "Custom message", listOf(1, 2, 3))
-        withTestApplication(moduleFunction = { main() }) {
-            handleRequest(HttpMethod.Get, "/custom-object") {
-                addHeader(HttpHeaders.Accept, "application/json")
-                addHeader(HttpHeaders.ContentType, "application/json")
-            }.apply {
-                Assert.assertEquals(HttpStatusCode.OK.value, response.status()?.value)
-                val result = mapper.readValue(response.content, jacksonTypeRef<CustomResponse>())
-                Assert.assertNotNull(result)
-                Assert.assertEquals(mapper.writeValueAsString(customResponse), mapper.writeValueAsString(result))
+        testApplication {
+            val response = getClient().get("/custom-object") {
+                header(HttpHeaders.Accept, "application/json")
+                header(HttpHeaders.ContentType, "application/json")
+            }
+
+            Assert.assertEquals(HttpStatusCode.OK.value, response.status.value)
+            val result: CustomResponse? = response.body()
+            Assert.assertNotNull(result)
+            Assert.assertEquals(mapper.writeValueAsString(customResponse), mapper.writeValueAsString(result))
+
+        }
+    }
+
+    private fun ApplicationTestBuilder.getClient(): HttpClient = createClient {
+        install(ContentNegotiation) {
+            jackson {
+                applyDefaultConfiguration()
+                configure(SerializationFeature.INDENT_OUTPUT, false)
             }
         }
     }
